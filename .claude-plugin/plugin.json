@@ -6,6 +6,6 @@
   "author": { "name": "Matias" },
   "homepage": "https://github.com/MatoMusha/design-system-wizard",
   "repository": "https://github.com/MatoMusha/design-system-wizard",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "keywords": ["design-system", "figma", "figc", "design-tokens", "style-dictionary", "shadcn", "radix", "tailwind", "storybook", "dtcg"]
 }
