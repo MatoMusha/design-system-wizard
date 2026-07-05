@@ -3,8 +3,18 @@
 **Status:** Normative standard for `design-system-wizard`
 **Applies to:** every foundation and every component in a design system managed by this plugin
 **Consumed by:** `/setup` (emits foundation + component doc pages), `/extend` (emits a doc frame per new component), `/audit` (scores via the **Canvas Documentation Checklist**, §11)
-**Related conventions:** [Component Contract](./component-contract.md) · [Agent-Readability](./agent-readability.md)
+**Related conventions:** [Component Contract](./component-contract.md) · [Craft & Measurement](./craft-and-measurement.md) · [Agent-Readability](./agent-readability.md)
 **Built by:** `figma-doc-builder` (renders) via `figc-operator` (the sole Figma interface)
+
+---
+
+## 0. Mandatory and non-skippable
+
+The canvas documentation layer is **always built** — it is not an optional finishing step, and no run of `/setup` or `/extend` is complete without it. `figma-doc-builder` **MUST** emit the full canonical file structure (§2) on every `/setup`, and append a conformant doc card on every `/extend`. There is no mode, flag, or shortcut that skips it.
+
+`/audit` treats a **missing** doc layer, a **stale** doc layer, or a **structurally wrong** doc layer (scattered components, overlapping frames, absolute positioning, missing canonical pages) as a **hard failure** — not a warning (§11). "The tokens and components exist but the Foundations/Components pages were never built" is exactly the failure this standard exists to prevent.
+
+Every doc frame **MUST also conform to [Craft & Measurement](./craft-and-measurement.md)**: auto-layout only (nothing absolute-positioned, nothing overlapping), all spacing/padding/gaps bound to `space/*` tokens on the 4px base, consistent outer margins, Lucide as the icon foundation, and the craft-verification loop (`figc shot` + inspect) run on every frame before it is considered done. This standard defines *what* the canvas docs contain and *how they are laid out at the file level*; Craft & Measurement defines the *pixel-level spatial discipline* every frame here must satisfy.
 
 ---
 
@@ -33,27 +43,38 @@ Canvas docs are **generated and regenerated** from the source, never hand-mainta
 
 ---
 
-## 2. The canvas documentation model
+## 2. Canonical Figma file architecture (mandatory)
 
-The canvas docs occupy a dedicated, named area of the Figma file. The structure is fixed so `/setup` emits it, `/extend` appends to it, and `/audit` can find every piece by name.
+The canvas docs occupy a **fixed, ordered set of top-level pages** in the Figma file. This structure is **canonical and mandatory** — `/setup` always emits exactly these pages in this order, `/extend` appends into them, and `/audit` locates every piece by page and name. Components are **never** scattered one-per-page; foundations are **never** left unbuilt. The ordered pages are:
 
 ```
-📖 Docs — Cover            (index / cover page, §8.3)
-📐 Foundations             (a page — or a clearly-labelled section — per foundation, §3)
-   ├─ Color                (doc frame: swatch grid, §4)
-   ├─ Typography           (doc frame: specimen per text style, §5)
-   ├─ Spacing              (doc frame: ruler specimens, §6)
-   ├─ Radius / Shape       (doc frame: corner specimens, §6)
-   ├─ Elevation / Shadow   (doc frame: shadow cards, §6)
-   ├─ Iconography          (doc frame — conditional, §6.4)
-   └─ Motion               (doc frame — conditional, §6.4)
-🧩 Components              (a doc frame per component, §7)
-   ├─ Button
-   ├─ Input
-   └─ …
+①  Cover                   (entry / index page, §8.3)
+②  Foundations             (one doc frame per foundation, §3–§6 — Color, Type, Spacing, Radius, Elevation, Icons, Motion)
+③  Components              (ALL component doc cards, together, in one auto-layout grid, §7)
+④  Patterns                (composed multi-component patterns / recipes — optional, present when the system defines any)
+    Changelog              (optional — generated version history of the doc layer)
 ```
 
-Every leaf above is a **documentation frame** built from the reusable template in §8. Foundation frames each live on (or under a labelled section of) the **Foundations** page; every component gets its own **component doc frame** under **Components**.
+| Page | Required | What lives here |
+|---|---|---|
+| **① Cover** | always | System name, version, and the linked index of every foundation frame and every component card (§8.3). The single entry surface. |
+| **② Foundations** | always | One doc frame per foundation — Color, Typography, Spacing, Radius, Elevation, **Icons (Lucide)**, Motion — laid out on the shared grid (§2.1). Split into clearly-labelled sections on one page, or (only if the file is large) one page per foundation under a `②a Color`, `②b Type`… numbering that preserves order. |
+| **③ Components** | always | **Every** component doc card, together, in a single **auto-layout grid** (§7). One page for the whole library; split to one page **per category** only when the library is large enough to warrant it — never one page per component. |
+| **④ Patterns** | conditional | Composed, multi-component patterns/recipes (form layouts, page shells, empty states). Present when the manifest defines any pattern; each pattern is one doc card on the shared grid. |
+| **Changelog** | optional | A generated record of doc-layer versions/regenerations. |
+
+The page numbering prefix (`①②③④`) is part of the name so the pages sort in canonical order and `/audit` can assert their presence and sequence. Every leaf frame on these pages is a **documentation frame / doc card** built from the reusable template in §8, and every one conforms to Craft & Measurement (auto-layout, token-bound spacing, no overlaps).
+
+### 2.1 One consistent layout grid (all doc pages and frames)
+
+Every doc page and every doc frame shares **one layout system** — the docs must read as a single, evenly-gridded document, not a pile of loose frames:
+
+- **Fixed outer margins:** a consistent outer padding on every page/frame — default **`space/1600` (64px)** — identical on all four sides. No frame hugs the edge; no frame floats at an arbitrary offset.
+- **Column grid:** a shared column grid (e.g. 12 columns with a token-bound gutter) that all doc frames align to. Foundation specimens and component cards snap to column boundaries; nothing is nudged by eye.
+- **Consistent section spacing:** the vertical rhythm between frames and between sections is a single spacing token (default **`space/1200` (48px)** between doc cards, **`space/800` (32px)** between sections within a frame) — never ad-hoc gaps.
+- **Auto-layout only, no overlaps:** every page is organized with auto-layout containers and every frame is auto-layout (§8). **Nothing is absolute-positioned and no two frames overlap** — this is the Craft & Measurement rule, enforced here at the page level. Overlapping or free-floating frames are a **hard failure** (§11, C-STRUCT-5).
+
+All of the above are driven from the system's own **spacing tokens** (4px base) — there are no magic numbers in the doc layout itself, per §8.1.
 
 ---
 
@@ -68,7 +89,7 @@ Each foundation gets a **documentation frame** using the §8 template. The set b
 | **Spacing** | always | Ruler/box specimens per space token + name + value (§6.1). |
 | **Radius / Shape** | always | Corner specimens per radius token + name + value (§6.2). |
 | **Elevation / Shadow** | conditional* | Shadow cards per elevation token + name + value (§6.3). |
-| **Iconography** | conditional | Icon grid; sizing/stroke rules; the icon component's usage (§6.4). |
+| **Icons** | always | **Lucide** icon grid — real icon instances at the system's icon sizes/stroke, with sizing and stroke rules and the icon component's usage (§6.4). |
 | **Motion** | conditional | Duration/easing specimens; named motion tokens + values (§6.4). |
 
 \* Elevation is **always required if the system defines any elevation/shadow tokens**; conditional only in flat systems that define none.
@@ -149,15 +170,25 @@ A **corner specimen** per radius token: a card whose corner radius equals the to
 ### 6.3 Elevation / Shadow
 A **shadow card** per elevation token: an identical surface carrying only that elevation's shadow effect (from the effect style/variable), labelled name (`elevation/raised`) + value (offset/blur/spread/color). Cards sit on a neutral ground so the shadow reads; shown in light and dark if elevations are mode-varying.
 
-### 6.4 Iconography and Motion (conditional)
-- **Iconography** (when an icon set exists): an **icon grid** of real icon instances, plus sizing and stroke rules and the icon component's usage. Icons are placed as instances (§7.1), never pasted vectors.
+### 6.4 Icons (always) and Motion (conditional)
+- **Icons** (always required): an **icon grid** of real **Lucide** icon instances at the system's defined icon size(s) and stroke width, plus the sizing/stroke rules and the icon component's usage. Icons are placed as instances (§7.1), never pasted vectors. Lucide is the icon foundation per Craft & Measurement; the grid is laid out on the shared column grid (§2.1) with token-bound gaps.
 - **Motion** (when motion tokens exist): **duration and easing specimens** — a labelled sample per duration token and per easing curve — with the named motion token and its value. Where the canvas cannot animate, the specimen shows the curve and duration as an annotated graph plus the token value.
 
 ---
 
 ## 7. Component documentation frames
 
-Every component has **one canvas doc frame** under **Components**, mirroring its **Component Contract** on the canvas. It uses the §8 template and contains, in order:
+### 7.0 Components page layout (organized, together, auto-layout grid)
+
+All component doc cards live **together on the ③ Components page** (or one page **per category** only when the library is large), arranged in a **single auto-layout grid** on the shared layout grid (§2.1). Each component gets **its own frame** — a **component doc card** — and the cards are laid into rows/columns by an auto-layout wrapper with token-bound gaps (default `space/1200` between cards). Cards are uniform in width and snap to the column grid.
+
+**Explicitly forbidden (each a hard failure, §11):**
+- **One-component-per-page scattering** — a separate page per component instead of the organized grid.
+- **Overlapping frames** — any two doc cards (or their contents) intersecting.
+- **Absolute positioning / free-floating cards** — cards placed by raw x/y instead of flowing inside the auto-layout grid.
+- **Inconsistent margins/gaps** — cards with differing outer margins or ad-hoc spacing instead of the shared grid's token-bound rhythm.
+
+Each **component doc card** is a doc frame (§8 template) that mirrors the component's **Component Contract** on the canvas and contains, in order:
 
 1. **Header** — component name, one-line description, status, APG pattern (from the Contract).
 2. **Variants & states matrix** — the component rendered **across all its variants and states** (e.g. every `variant` × `size`, plus hover/focus/disabled/loading where they are distinct visual states), each as a **real component instance**.
@@ -224,9 +255,9 @@ Frame: "<Area> / <Name>"          (auto-layout ▮ vertical ▮ gap = space toke
 
 The **section order is fixed per doc type** (Color's regions, Typography's overview-then-specimens, a component's Header → Variants → Anatomy → Usage → Do/Don't). `/setup` emits frames in this order; `/audit` checks presence and order; `/extend` fills the same skeleton for each new component.
 
-### 8.3 Docs cover / index
+### 8.3 Cover / index
 
-A **Docs — Cover** page is the entry surface: system name, version, and a linked index of every foundation page and every component doc frame. It is regenerated whenever a page is added or removed, so the index never lists a page that does not exist (or omits one that does).
+The **① Cover** page (§2) is the entry surface: system name, version, and a linked index of every foundation frame and every component doc card. It is regenerated whenever a page or card is added or removed, so the index never lists a page that does not exist (or omits one that does).
 
 ---
 
@@ -297,10 +328,16 @@ The canvas docs are indexed in `ds-manifest.json` so `/audit` can locate each fr
 ### Presence & structure
 | ID | Type | Check |
 |---|---|---|
-| C-STRUCT-1 | **[blocker]** binary | A **Docs — Cover / index** page exists and lists exactly the foundation pages and component doc frames that exist (no missing, no phantom entries). |
-| C-STRUCT-2 | **[blocker]** graded | **Every required foundation** (§3) has a doc frame present (`figmaNodeId` non-null): fraction of required foundations present. |
-| C-STRUCT-3 | binary | Every **conditional** foundation that the system actually defines (icons/motion/elevation tokens exist) has a doc frame present. |
+| C-STRUCT-0 | **[blocker]** binary | The **canonical pages exist in order**: `① Cover`, `② Foundations`, `③ Components` (plus `④ Patterns` iff the system defines patterns). The doc layer was actually built — not skipped (§0, §2). |
+| C-STRUCT-1 | **[blocker]** binary | The **① Cover / index** page exists and lists exactly the foundation frames and component doc cards that exist (no missing, no phantom entries). |
+| C-STRUCT-2 | **[blocker]** graded | **Every required foundation** (§3, incl. **Icons**) has a doc frame present (`figmaNodeId` non-null): fraction of required foundations present. |
+| C-STRUCT-3 | binary | Every **conditional** foundation that the system actually defines (motion/elevation tokens exist) has a doc frame present. |
 | C-STRUCT-4 | graded | Fraction of foundation/component frames whose sections appear **in the fixed order** for their doc type (§8.2). |
+| C-STRUCT-5 | **[blocker]** binary | **Components are together on the ③ Components page in one auto-layout grid** — not scattered one-per-page (§7.0). Fails if any component has its own dedicated page instead of a card in the grid. |
+| C-STRUCT-6 | **[blocker]** binary | **No overlapping frames** anywhere in the doc layer — no two doc cards/frames (or their contents) intersect, and none are absolute-positioned/free-floating outside the auto-layout flow (§2.1, §7.0). |
+| C-STRUCT-7 | graded | **Consistent margins & grid:** fraction of doc frames whose outer margins equal the standard (`space/1600`) and that align to the shared column grid with token-bound section spacing (§2.1). |
+| C-STRUCT-8 | **[blocker]** graded | **Auto-layout everywhere:** fraction of doc pages/frames organized with auto-layout (nothing absolute-positioned), per Craft & Measurement. |
+| C-STRUCT-9 | binary | The **Icons foundation is present and uses Lucide** — real Lucide icon instances in a grid, not pasted vectors (§6.4). |
 
 ### Freshness (sync rule)
 | ID | Type | Check |
@@ -347,7 +384,7 @@ The canvas docs are indexed in `ds-manifest.json` so `/audit` can locate each fr
 ### Score & gate
 The canvas docs are **Canvas-conformant** when every **[blocker]** check passes; the **Canvas Documentation Score** is the fraction of all checks passed (graded checks contribute their ratio). `/setup` emits canvas docs that pass all checks; `/extend` must not lower the score (every new component ships its conformant doc frame); `/audit` reports failing check IDs with the offending Figma node id and, for stale frames, the diverging `sourceHash`.
 
-**Gate rule:** a canvas doc set with any failing **C-FRESH-1** (a stale frame) cannot be scored above *non-conformant*, because stale documentation actively misleads — the two surfaces have diverged, which this standard exists to prevent.
+**Gate rule:** a canvas doc set is *non-conformant* — regardless of other scores — if any of these hold: the doc layer is **missing / was skipped** (C-STRUCT-0), a required foundation or component frame is absent (C-STRUCT-2, C-CMP-1), components are **scattered** rather than in the auto-layout grid (C-STRUCT-5), any frames **overlap or are absolute-positioned** (C-STRUCT-6, C-STRUCT-8), or any frame is **stale** (C-FRESH-1). Missing, structurally-wrong, and stale doc layers all actively mislead a designer reading the file — which is exactly what this standard exists to prevent.
 
 ---
 

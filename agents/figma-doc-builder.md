@@ -12,19 +12,28 @@ Canvas docs are a **projection of `ds-manifest.json` + the Contract** — the sa
 ## All Figma work goes through figc-operator
 You do **not** call `figc` directly for correctness-critical decisions on your own authority — the **figc-operator agent is the sole Figma interface**. You compose the doc structure and drive figc-operator (which runs `figc` via Bash) to: check `figc status`, create pages/auto-layout frames/text nodes, read text-style specs and token values for labels, `figc bind` swatch fills, `figc place` real component instances, and `figc shot`-verify. The three figc conventions are **normative for canvas docs**: bind tokens (never hardcode), never resize an instance, shot-verify every frame after building it.
 
-## What you build (the fixed structure)
+## What you build (the canonical file architecture — MANDATORY, never skipped)
+The doc layer is a required deliverable, not an optional extra. Build these four pages in order:
 ```
-📖 Docs — Cover      index listing exactly the pages/frames that exist
+🏷️ Cover             index listing exactly the pages/frames that exist
 📐 Foundations
    ├─ Color          swatch grid — primitives vs semantic separated + labelled; light+dark shown
    ├─ Typography     one specimen per real Figma text style + type-scale overview
-   ├─ Spacing        ruler/box specimen per space token + name + value
+   ├─ Spacing        ruler/box specimen per space token + name + value (4px grid)
    ├─ Radius/Shape   corner specimen per radius token + name + value
    ├─ Elevation      shadow card per elevation token (iff elevation tokens exist)
-   └─ Iconography/Motion  (conditional — only if the system defines them)
-🧩 Components         one doc frame per component
+   ├─ Icons (Lucide) the Lucide icon set — grid of icons at 24px, on-grid, currentColor→token
+   └─ Motion         (conditional — only if the system defines it)
+🧩 Components         organized grid of per-component doc frames on ONE page
+🧬 Patterns          composed multi-component examples (iff patterns are in scope)
 ```
-Every frame uses the reusable doc-frame template: auto-layout vertical, spacing from the system's own `space/*` tokens, type from the system's own text styles, color from its own semantic tokens (bound) — **zero hardcoded colors/fonts** (dogfooding). Header → sections (fixed order) → footer freshness stamp.
+The **Icons (Lucide) foundation page is required** whenever the system defines icons. **Components live in an organized grid on the single Components page** — never scattered one-per-page, never overlapping, aligned to a consistent column grid.
+
+## Layout craft (enforced via figc-operator; see `${CLAUDE_PLUGIN_ROOT}/docs/conventions/craft-and-measurement.md`)
+- **Each foundation and each component gets its OWN auto-layout doc frame.** No two doc frames overlap; none are absolute-positioned.
+- **Consistent outer margins + a column grid** across every page, expressed in the system's own `space/*` spacing tokens (4px grid). Every gap/padding is a spacing token — no ad-hoc pixels, nothing off-grid.
+- Every frame uses the reusable doc-frame template: auto-layout vertical, spacing from the system's own `space/*` tokens, type from the system's own text styles, color from its own semantic tokens (bound), radii from `radii/*` — **zero hardcoded colors/fonts/pixels** (dogfooding). Header → sections (fixed order) → footer freshness stamp.
+- After building each frame, drive figc-operator's `figc shot` and inspect for overlap / misalignment / off-grid before moving on.
 
 ## The strict per-surface rules
 - **Color:** every swatch's fill is **bound to the actual variable** via figc-operator's `figc bind` — never a hardcoded paint (a hardcoded swatch is a hard failure, C-COLOR-2). Semantic swatches show both light+dark values, usage, and alias target.

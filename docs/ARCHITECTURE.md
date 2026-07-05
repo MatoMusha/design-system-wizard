@@ -40,11 +40,12 @@ Each is a plan→approve→execute skill that dispatches worker agents.
   primitives + semantic scales) → `component-planner` (component inventory + the
   Component Contract doc structure). → written DS plan, STOP.
 - **Execute (on approval):** `figc-operator` builds variable collections/modes +
-  base components in Figma, and builds **typography as real Figma text styles**
-  (not raw variables); `token-writer` emits DTCG token JSON; `doc-writer`
-  scaffolds Component Contract docs; `figma-doc-builder` renders the **canvas
-  documentation pages** (Color, Typography, and the other foundations). Writes
-  `ds-manifest.json`.
+  base components (auto-layout only, token-bound spacing, Lucide icons — never
+  overlapping), and builds **typography as real Figma text styles** (not raw
+  variables); `token-writer` emits DTCG token JSON; `doc-writer` scaffolds
+  Component Contract docs; `figma-doc-builder` renders the **canvas documentation**
+  into the canonical file structure; `craft-reviewer` runs the **craft-QA loop**
+  until the Craft Checklist passes. Writes `ds-manifest.json`.
 
 ### `/audit` — audit an existing design system
 - **Plan:** `ds-scanner` inventories what exists (Figma vars via `figc-operator`
@@ -66,10 +67,10 @@ execute**, conforming to the system's standard.
   STOP. New semantic tokens are surfaced explicitly, never invented silently.
 - **Execute (on approval):** optional new semantic-token step → `figc-operator`
   builds the component + variants (bound tokens, `figc shot`-verify) →
-  `component-generator` wires the Radix/shadcn component to semantic tokens →
-  Component Contract doc → `figma-doc-builder` renders the component's **canvas
-  doc frame** → `storybook-builder` stories → manifest + parity update →
-  `parity-verifier`.
+  `component-generator` wires the Radix/shadcn component to semantic tokens
+  (Lucide icons) → Component Contract doc → `figma-doc-builder` renders the
+  component's **canvas doc card** → `storybook-builder` stories → `craft-reviewer`
+  QA loop → manifest + parity update → `parity-verifier`.
 
 ### `/infra` — build the design-to-code pipeline *(→ [export spec](specs/figma-dtcg-export.prompt.md))*
 - **Plan:** `repo-strategist` (existing GitHub repo vs provision new; branching)
@@ -117,8 +118,20 @@ Referenced by all four commands: `/setup` builds *to* them, `/audit` scores
   kept in sync by a `sourceHash` freshness rule. Ships the **Canvas
   Documentation Checklist** (with a staleness gate) that `/audit` runs.
 
+- **[Craft & Measurement Standard](conventions/craft-and-measurement.md)** — how
+  the system becomes *actually good*, not just good-looking. **Inherit taste,
+  don't invent it:** ground color in **Radix Colors** (or shadcn defaults),
+  spacing on a **4px grid** (Tailwind scale), a modular **type scale**
+  (Inter/Geist), a radius + 5-step elevation scale, and **icons = Lucide**.
+  **Pixel-perfect / auto-layout only:** every measurement is a spacing token;
+  nothing is absolute-positioned or overlapping. **Craft-verification loop:**
+  `figc shot` → inspect → fix → re-shoot until the **Craft Checklist** passes.
+  Owned by the `craft-reviewer` agent; enforced by `/setup`, `/extend`, `/audit`.
+
 > These distill widely-used best practices into an original, self-owned
-> standard. No third-party design system is cited as their source.
+> standard. No third-party design system is cited as a *style* source; Radix,
+> Tailwind, shadcn, and Lucide are named only as the technical foundations the
+> system is built on.
 
 ---
 
@@ -198,6 +211,7 @@ dimension.
 | `component-generator` | extend, infra | shadcn/Radix component wired to semantic tokens. |
 | `storybook-builder` | extend, infra | Storybook stories (examples-as-data). |
 | `parity-verifier` | extend, infra, audit | Guardian of design↔code name parity. |
+| `craft-reviewer` | setup, extend, audit | Visual-QA loop: `figc shot` → inspect against the Craft Checklist (overlaps, off-grid, hierarchy, contrast) → loop fixes through `figc-operator` until it passes. |
 
 ---
 

@@ -28,12 +28,24 @@ below rather than reproducing its contents from memory — the docs are canonica
    `agent-readability-report`.
 
 3. **Canvas Documentation Standard** — `${CLAUDE_PLUGIN_ROOT}/docs/conventions/canvas-documentation.md`
-   Documentation rendered **on the Figma canvas**: foundation pages (Color,
-   Typography specimens from real text styles, Spacing, Radius, Elevation, +
-   conditional Iconography/Motion) and a doc frame per component. Canvas and
-   code docs are two projections of one source, kept in sync by a `sourceHash`
-   freshness rule. Evaluated by the **Canvas Documentation Checklist** (with a
-   staleness gate).
+   Documentation rendered **on the Figma canvas** in a canonical file structure
+   (`Cover · Foundations · Components · Patterns`): foundation pages (Color,
+   Typography specimens from real text styles, Spacing, Radius, Elevation, Icons)
+   and each component as its own auto-layout doc card on an organized Components
+   page — never scattered, never overlapping. Canvas and code docs are two
+   projections of one source, kept in sync by a `sourceHash` freshness rule.
+   Evaluated by the **Canvas Documentation Checklist** (with a staleness gate).
+
+4. **Craft & Measurement Standard** — `${CLAUDE_PLUGIN_ROOT}/docs/conventions/craft-and-measurement.md`
+   How the system becomes *actually good*, not just good-looking. Core rules:
+   **inherit taste, don't invent it** — ground color in **Radix Colors** (or
+   shadcn defaults), spacing on a **4px grid** (Tailwind scale), a modular **type
+   scale** (Inter/Geist, correct line-heights), a radius + 5-step elevation scale,
+   and **icons = Lucide**. **Pixel-perfect / auto-layout only** — every
+   gap/padding/size is a spacing token; nothing absolute-positioned; nothing
+   overlaps. **Craft-verification loop** — `figc shot` → inspect → fix → re-shoot
+   until it passes the **Craft Checklist**. Owned at runtime by the
+   `craft-reviewer` agent.
 
 ## The token spine (two-tier + parity)
 

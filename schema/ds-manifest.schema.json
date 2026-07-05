@@ -150,6 +150,7 @@
         "agentReadabilityBand": { "type": "string", "enum": ["not-agent-ready", "partial", "good", "excellent"] },
         "componentContractPass": { "type": "boolean" },
         "canvasDocsPass": { "type": "boolean" },
+        "craftPass": { "type": "boolean", "description": "Craft Checklist result (Craft & Measurement Standard)." },
         "reportPath": { "type": "string" }
       }
     }

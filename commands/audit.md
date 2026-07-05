@@ -1,5 +1,5 @@
 ---
-description: Audit an existing design system against the three conventions — inventory design + code, score the Contract / Agent-Readability / Canvas checklists, and produce a prioritized fix plan before applying anything.
+description: Audit an existing design system against the conventions — inventory design + code, score the Contract / Agent-Readability / Canvas / Craft checklists, and produce a prioritized fix plan before applying anything.
 argument-hint: "[repo path or Figma file]"
 allowed-tools: Agent, Read, Write, Edit, Bash
 ---
@@ -17,6 +17,7 @@ This command is **plan → approve → execute**. The plan phase only reads and 
    - the **Component Contract Evaluation Checklist** results (24 binary PASS/FAIL checks; report failing check numbers with the offending path; note `[blocker]` failures),
    - the **Agent-Readability Score** (0–100, with band and `topFixes`; the `ds-manifest.json` gate),
    - the **Canvas Documentation Checklist** results — **including the staleness gate**: a present-but-stale doc frame (`sourceHash` ≠ current) fails just like a missing one, and any `C-FRESH-1` failure caps the set at non-conformant.
+   - the **Craft Checklist** results (Craft & Measurement Standard) — via `@design-system-wizard:craft-reviewer` `figc shot`-inspecting the file: overlaps/absolute positioning, off-grid spacing, hardcoded colors, radii/type off-scale, non-Lucide icons, contrast failures. Report `[blocker]` failures.
 3. **Fix plan.** Dispatch `@design-system-wizard:fix-planner` to turn the findings into a report + **prioritized fix plan** (blockers first, grouped by fix category, each fix naming the surface it touches). Surface any real decisions (naming, token restructuring) as questions rather than deciding them.
 
 **STOP. Present the report + prioritized fix plan and WAIT for the human's explicit approval. Apply no fixes — touch no Figma, code, tokens, or manifest — until the human approves (and may approve a subset).**
