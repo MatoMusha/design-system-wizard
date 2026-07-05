@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MatoMusha/design-system-wizard/schema/ds-manifest.schema.json",
+  "title": "ds-manifest",
+  "description": "Shared state for design-system-wizard. Written by /setup, annotated by /audit, appended by /extend, consumed+extended by /infra. Also the primary machine-readable entry point for Agent-Readability (Discoverability dimension).",
+  "type": "object",
+  "required": ["schemaVersion", "name", "tokens", "components"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "SemVer of this manifest schema.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "name": { "type": "string", "description": "Design system name." },
+    "description": { "type": "string" },
+    "version": { "type": "string", "description": "SemVer of the design system itself." },
+    "generatedBy": {
+      "type": "object",
+      "description": "Provenance. Timestamps are stamped by the tool, never invented.",
+      "additionalProperties": false,
+      "properties": {
+        "command": { "type": "string", "enum": ["setup", "audit", "extend", "infra"] },
+        "tool": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "brand": {
+      "type": "object",
+      "description": "Captured brand/context brief from /setup's interview.",
+      "additionalProperties": true,
+      "properties": {
+        "mainColor": { "type": "string" },
+        "typography": { "type": "string" },
+        "tone": { "type": "string" },
+        "existingProduct": { "type": ["string", "null"] }
+      }
+    },
+    "figma": {
+      "type": "object",
+      "description": "Source-of-truth Figma file identity (read-only; design->code one-way).",
+      "additionalProperties": false,
+      "properties": {
+        "fileName": { "type": "string" },
+        "fileKey": { "type": ["string", "null"] },
+        "collections": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["primitives", "semantic"] }
+        },
+        "modes": { "type": "array", "items": { "type": "string" }, "description": "e.g. [\"Light\", \"Dark\"]" }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "description": "Two-tier taxonomy. Primitives are raw scales; semantic aliases primitives and its names emit shadcn's fixed identifiers.",
+      "required": ["primitives", "semantic"],
+      "additionalProperties": false,
+      "properties": {
+        "format": { "type": "string", "const": "dtcg" },
+        "outputDir": { "type": "string", "description": "Where the exported DTCG files live." },
+        "primitives": { "$ref": "#/$defs/tokenTier" },
+        "semantic": { "$ref": "#/$defs/tokenTier" },
+        "typography": {
+          "type": "object",
+          "description": "Typography is authored as Figma text styles -> DTCG typography composite tokens, plus atomic type primitives.",
+          "additionalProperties": false,
+          "properties": {
+            "textStyles": { "type": "array", "items": { "type": "string" }, "description": "Text style names, e.g. heading/lg." },
+            "compositeFile": { "type": "string" }
+          }
+        }
+      }
+    },
+    "parityMap": {
+      "type": "array",
+      "description": "The design<->code name-parity spine. One entry per token; parity-verifier asserts string-identity across every hop.",
+      "items": {
+        "type": "object",
+        "required": ["figmaName", "dtcgPath", "cssVar"],
+        "additionalProperties": false,
+        "properties": {
+          "figmaName": { "type": "string", "description": "e.g. semantic collection variable 'primary'." },
+          "dtcgPath": { "type": "string", "description": "e.g. {primary} / semantic.primary." },
+          "cssVar": { "type": "string", "description": "e.g. --primary." },
+          "tailwindToken": { "type": "string", "description": "e.g. bg-primary / --color-primary." },
+          "reactIdentifier": { "type": "string" },
+          "storybookStory": { "type": "string" },
+          "tier": { "type": "string", "enum": ["primitive", "semantic"] }
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "description": "Component inventory. Each entry points at its Component Contract doc and its canvas doc frame.",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "status": { "type": "string", "enum": ["planned", "built", "documented", "coded", "verified"] },
+          "radixPrimitive": { "type": ["string", "null"], "description": "Backing Radix primitive, if any." },
+          "contractDoc": { "type": "string", "description": "Path to the Component Contract markdown/JSON." },
+          "figmaComponentKey": { "type": ["string", "null"] },
+          "codePath": { "type": ["string", "null"] },
+          "storybookPath": { "type": ["string", "null"] },
+          "semanticTokens": { "type": "array", "items": { "type": "string" }, "description": "Semantic tokens this component consumes (never primitives, never hex)." }
+        }
+      }
+    },
+    "canvasDocs": {
+      "type": "object",
+      "description": "Canvas Documentation Standard state. Two surfaces (canvas + code) stay in sync via sourceHash.",
+      "additionalProperties": false,
+      "properties": {
+        "foundations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["foundation", "pageId"],
+            "additionalProperties": false,
+            "properties": {
+              "foundation": { "type": "string", "enum": ["color", "typography", "spacing", "radius", "elevation", "iconography", "motion"] },
+              "pageId": { "type": "string", "description": "Figma page/frame node id." },
+              "sourceHash": { "type": "string", "description": "Hash of the source content this canvas doc was rendered from; /audit fails stale docs." }
+            }
+          }
+        },
+        "componentFrames": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["component", "frameId"],
+            "additionalProperties": false,
+            "properties": {
+              "component": { "type": "string" },
+              "frameId": { "type": "string" },
+              "sourceHash": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "description": "Last audit results (annotated by /audit).",
+      "additionalProperties": false,
+      "properties": {
+        "agentReadabilityScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "agentReadabilityBand": { "type": "string", "enum": ["not-agent-ready", "partial", "good", "excellent"] },
+        "componentContractPass": { "type": "boolean" },
+        "canvasDocsPass": { "type": "boolean" },
+        "reportPath": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "tokenTier": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "file": { "type": "string", "description": "DTCG file for this tier (or per-mode files for semantic)." },
+        "modeFiles": {
+          "type": "object",
+          "description": "Per-mode DTCG files, e.g. { \"Light\": \"semantic.light.json\", \"Dark\": \"semantic.dark.json\" }.",
+          "additionalProperties": { "type": "string" }
+        },
+        "groups": { "type": "array", "items": { "type": "string" }, "description": "Top-level token groups, e.g. color, spacing, radius." }
+      }
+    }
+  }
+}

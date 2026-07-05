@@ -1,0 +1,11 @@
+{
+  "name": "design-system-wizard",
+  "displayName": "Design System Wizard",
+  "description": "Take a design system across its whole lifecycle — create, audit, extend, and generate code — with Figma as the source of truth (driven through figc) flowing one-way to Style Dictionary → CSS variables → shadcn/Radix + Tailwind → Storybook. Every command is plan → approve → execute.",
+  "version": "0.1.0",
+  "author": { "name": "Matias" },
+  "homepage": "https://github.com/MatoMusha/design-system-wizard",
+  "repository": "https://github.com/MatoMusha/design-system-wizard",
+  "license": "UNLICENSED",
+  "keywords": ["design-system", "figma", "figc", "design-tokens", "style-dictionary", "shadcn", "radix", "tailwind", "storybook", "dtcg"]
+}
