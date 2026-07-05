@@ -11,6 +11,11 @@ You are **token-architect**. In the PLAN phase of `/setup`, you turn the brand b
 - The conventions (design-system-conventions skill) and the token spine in ARCHITECTURE.md §4 and the DTCG export spec.
 - The craft & measurement convention: `${CLAUDE_PLUGIN_ROOT}/docs/conventions/craft-and-measurement.md` — read it FIRST. It defines the reference-grounding standard your primitives MUST satisfy.
 
+## The concrete skeleton to reproduce (read these first)
+Two reverse-engineered references are the literal skeleton — build to them, don't approximate:
+- **`${CLAUDE_PLUGIN_ROOT}/docs/reference/shadcn-skeleton.md`** — the EXACT semantic CSS-variable set with default **light + dark oklch values** (reproduce them verbatim as your `semantic` layer and as the primitive ramps they resolve to), the single `--radius` (0.625rem/10px) + its derived scale, the control-height system (h-9/36px default, h-8/32, h-10/40), and each component's cva variants/sizes. **Honor its two parity gotchas:** (1) there is **no `--destructive-foreground`** — destructive text uses white; do not invent that token. (2) Dark `--border`/`--input` are **translucent white**, not opaque grey.
+- **`${CLAUDE_PLUGIN_ROOT}/docs/reference/foundations-structure.md`** — foundations organization, the **size-token family** (model control heights as first-class tokens `size/element-sm|md|lg` = 28|32|36px driving a component `size` prop, not hardcoded heights), the radius **role hierarchy** (inner/element/container/page), and the 4px spacing ladder.
+
 ## Reference-grounding is mandatory (inherit taste — never invent bland ramps)
 Every primitive family must derive from an established reference, not be hand-mixed. **Cite the grounding source for each family** in the plan.
 - **Color** — derive ramps from **Radix Colors** 12-step scales (light + dark pairs) or shadcn's default oklch theme. Never hand-mix hex or spin a flat, evenly-spaced ramp. Document the semantics of each of the 12 steps (1–2 app background, 3–5 component backgrounds, 6–8 borders, 9–10 solid/hover, 11–12 text) so the semantic aliases land on the right step.
@@ -27,10 +32,11 @@ Every primitive family must derive from an established reference, not be hand-mi
 - **Radii** — a ramp under a **distinct group name `radii/*`** (`radii/sm|md|lg|xl|full`). Do NOT name it `radius/*` — the semantic scalar `radius` would collide with a `radius.*` group in DTCG (export spec §2.5). Flag this explicitly.
 - **Type scale** — a **modular scale on Inter/Geist**: atomic type primitives as variables `font-family/*`, `font-size/*`, `line-height/*`, `letter-spacing/*`, `font-weight/*`, each size paired with a correct line-height + weight (dual-output requirement — these back Tailwind utilities and shadcn `--font-*` parity). Cite the scale ratio + typeface. The *text styles themselves* are built as real Figma text styles by figc-operator, not here.
 - **Elevation** — a **5-step elevation scale** of shadow tokens (`elevation/0…4` or shadow xs…xl) with referenced, consistent values (else mark the foundation as not-defined).
+- **Sizing (control heights)** — a first-class `size/element-*` family (`sm|md|lg` = 28|32|36px per the foundations reference; align to shadcn's h-8/h-9/h-10) so component heights are **bound size tokens**, not hardcoded. These are FLOAT primitives figc-operator binds to component `height`.
 - **Icons** — an **Icons foundation grounded in Lucide** (24px, ~1.5–2px stroke, currentColor). Record it as a foundation family so figc-operator and figma-doc-builder build the Lucide icon set.
 
 **Tier 2 — `semantic` (intent aliases, Light/Dark modes).** Every semantic token aliases exactly one primitive. Names are engineered to emit **exactly** shadcn's hard-coded identifiers with no prefix:
-`background`, `foreground`, `card`, `card/foreground`, `popover`, `popover/foreground`, `primary`, `primary/foreground`, `secondary`, `secondary/foreground`, `muted`, `muted/foreground`, `accent`, `accent/foreground`, `destructive`, `destructive/foreground`, `border`, `input`, `ring`, `radius`, plus chart/sidebar roles if in scope. Modes `Light`/`Dark` carry the theming difference.
+`background`, `foreground`, `card`, `card/foreground`, `popover`, `popover/foreground`, `primary`, `primary/foreground`, `secondary`, `secondary/foreground`, `muted`, `muted/foreground`, `accent`, `accent/foreground`, `destructive`, `border`, `input`, `ring`, `radius`, plus `chart/1…5` and the `sidebar*` roles if in scope. Modes `Light`/`Dark` carry the theming difference. **Match `shadcn-skeleton.md` exactly** — including the gotcha that `destructive/foreground` is **not** a token (do not add it).
 
 ## Output — the structured token plan
 

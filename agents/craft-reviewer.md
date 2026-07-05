@@ -16,11 +16,13 @@ You do not mutate the canvas. You drive `figc` via Bash **only to screenshot and
 1. Confirm `figc status` (daemon + plugin). If down, STOP and report.
 2. `figc shot` **each foundation page** (Color, Typography, Spacing, Radius, Elevation, Icons) and **each component doc frame** (and Patterns, if present). Locate frames with `figc find` / the manifest `canvasDocs` node ids.
 3. `Read` every screenshot and inspect it against the Craft Checklist.
+4. **Verify tokens are actually applied (not just visually plausible).** Screenshots cannot tell a bound token from a lucky raw value. For each component and key frame, run **`figc bound <nodeId>`** and confirm the reported `boundVariables` cover the auto-layout **gap/padding** (spacing tokens), **radius**, **size/height**, and that **fills/strokes** are bound color tokens — NOT raw numbers or hex. A field showing a raw value where a token is expected is a `tokens-not-bound` defect, dispatched to figc-operator to re-bind with `figc bind <id> <target> <token>`. Walk into children (`figc tree`) for the parts that carry spacing/color.
 
 ## The Craft Checklist (each item is pass/fail per frame)
 - **No overlaps** — no node overlaps or occludes another; nothing absolute-positioned.
 - **Auto-layout everywhere** — every frame is auto-layout with hug/fill sizing.
 - **Spacing on-grid + token-bound** — every gap/padding/size is a `space/*` token on the 4px grid. No off-grid or ad-hoc values.
+- **Tokens actually bound** (verified via `figc bound`, not just by eye) — gap, padding, radius, size, and fill/stroke report `boundVariables`, not raw numbers/hex.
 - **Radii from the scale** — corner radii come only from `radii/*`; consistent, no one-off values. Borders consistent and token-bound.
 - **Type from the scale** — text uses real Figma text styles with correct sizes/line-heights/weights; clear hierarchy, no detached/hand-set type; no weak or muddled hierarchy.
 - **Icons = Lucide, on-grid** — icons are Lucide, ~24px, ~1.5–2px stroke, currentColor→token, aligned to the grid.

@@ -47,6 +47,22 @@ below rather than reproducing its contents from memory — the docs are canonica
    until it passes the **Craft Checklist**. Owned at runtime by the
    `craft-reviewer` agent.
 
+## Reference skeletons (the concrete foundation to build to)
+
+The design system is not invented from scratch — it is built to reverse-engineered,
+proven skeletons:
+
+- **`${CLAUDE_PLUGIN_ROOT}/docs/reference/shadcn-skeleton.md`** — the CONCRETE token
+  + component contract from shadcn/ui (MIT, and our code target): the exact
+  semantic CSS-variable set with default **light + dark oklch** values, the
+  `--radius` derivation, the control-height system, and all 14 core components with
+  their exact `cva` variants/sizes, anatomy, and focus recipe. Reproduce it
+  verbatim — that IS the parity contract. Two gotchas: no `--destructive-foreground`
+  (destructive text is white); dark `--border`/`--input` are translucent.
+- **`${CLAUDE_PLUGIN_ROOT}/docs/reference/foundations-structure.md`** — the
+  foundations organization, the **size-token family** (control heights as tokens),
+  the radius role hierarchy, and the 4px spacing ladder.
+
 ## The token spine (two-tier + parity)
 
 - **Two-tier tokens:** a `primitives` collection (raw scales) and a `semantic`
