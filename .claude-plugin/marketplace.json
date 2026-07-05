@@ -1,0 +1,17 @@
+{
+  "name": "design-system-wizard",
+  "owner": { "name": "Matias" },
+  "metadata": {
+    "description": "Design System Wizard — create, audit, extend, and code-generate design systems from Figma via figc."
+  },
+  "plugins": [
+    {
+      "name": "design-system-wizard",
+      "source": ".",
+      "version": "0.1.0",
+      "description": "Take a design system from create → audit → extend → design-to-code, with Figma as the source of truth (via figc).",
+      "repository": "https://github.com/MatoMusha/design-system-wizard",
+      "license": "UNLICENSED"
+    }
+  ]
+}
