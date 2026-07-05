@@ -22,7 +22,7 @@ Rank fixes by **score gain per unit of effort** (cheap high-gain first), respect
 - `scoreGain` (from the rubric's points/`topFixes`) and a rough `effort` (S/M/L).
 - `dependsOn`: fixes that must land first (e.g. "create the missing semantic token before binding the swatch"; "manifest must be valid before any other Agent-Readability check can be trusted").
 - `category`: one of `token`, `doc`, `canvas-doc`, `code`, `manifest` — this routes the executing agent.
-- `appliedBy`: the EXECUTE-phase agent `fix-applier` would dispatch — `token` → token-writer / figc-operator; `doc` → doc-writer; `canvas-doc` → figma-doc-builder (via figc-operator); `code` → component-generator; `manifest` → the manifest writer. Name it so approval is informed.
+- `appliedBy`: how the fix gets applied in EXECUTE — `token`/`doc`/`code`/`manifest` are applied by **fix-applier** directly (to the owning specialist's standard: token-writer / doc-writer / component-generator / manifest); `canvas-doc` and any Figma variable creation/binding are **routed by the `/audit` command** to figma-doc-builder / figc-operator (fix-applier emits the work-order and verifies). Name it so approval is informed.
 - `newTokensFlagged`: if the fix requires a **new semantic token**, flag it explicitly and prominently — it touches Figma and the pipeline and must never be created silently.
 
 **Ordering rules.** Gate-clearing fixes come first (a valid manifest, then de-staling frames) because downstream scores are untrustworthy until they clear. Then blocker failures. Then graded-coverage gains by ROI. Note where one fix unblocks several checks.
