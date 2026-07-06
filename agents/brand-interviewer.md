@@ -30,7 +30,7 @@ Ask these, grouped. Skip a question only when a prior answer already settles it.
 5. **Density & ergonomics**
    - Information density: compact (data-dense/admin) vs comfortable (spacious/marketing)?
    - Default corner style: sharp, subtle, or rounded/pill?
-   - Light-only, dark-only, or both modes? (Both is the default; this sets the theming axis.)
+   - **Theming modes — always ask explicitly (required):** Light only · **Light + Dark** (default) · Dark only. This is a hard decision, not a throwaway — it sets the theming axis and has real downstream cost, so surface it as its own question and never assume it. The answer drives the manifest `figma.modes`, whether `semantic.dark.json` is emitted, and (when both) a **parallel two-mode build** in execute. If "both", the semantic layer must carry a resolved value per mode for every role from the start — you cannot bolt dark on cleanly later.
 6. **References & scope**
    - Any reference images, moodboards, or competitor screens to anchor the visual direction?
    - Rough component scope for v1 (which surfaces/flows must ship first)?
