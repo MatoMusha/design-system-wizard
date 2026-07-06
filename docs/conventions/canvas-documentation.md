@@ -4,7 +4,7 @@
 **Applies to:** every foundation and every component in a design system managed by this plugin
 **Consumed by:** `/setup` (emits foundation + component doc pages), `/extend` (emits a doc frame per new component), `/audit` (scores via the **Canvas Documentation Checklist**, §11)
 **Related conventions:** [Component Contract](./component-contract.md) · [Craft & Measurement](./craft-and-measurement.md) · [Agent-Readability](./agent-readability.md)
-**Built by:** `figma-doc-builder` (renders) via `figc-operator` (the sole Figma interface)
+**Built by:** `figma-doc-builder` — the specialized canvas-docs worker, which runs `figc` itself under the conventions `figc-operator` owns
 
 ---
 
@@ -265,8 +265,8 @@ The **① Cover** page (§2) is the entry surface: system name, version, and a l
 
 ### 9.1 Roles
 
-- **`figma-doc-builder`** — a dedicated agent role that **owns rendering the canvas docs from the manifest**. It reads a source slice (a foundation's tokens, or a component's Contract), and emits the doc pages/frames, swatches, specimens, matrices, and Do/Don't pairs. It is invoked by `figc-operator`, or runs as its sibling, on `/setup` (all foundations + components) and on `/extend` (one component doc frame).
-- **`figc-operator`** — the **sole** Figma interface (per the architecture roster). All of `figma-doc-builder`'s Figma writes go through it: creating pages/frames/auto-layout/text, placing component instances, binding token swatches, and screenshotting to verify.
+- **`figma-doc-builder`** — a dedicated agent role that **owns rendering the canvas docs from the manifest**. It reads a source slice (a foundation's tokens, or a component's Contract), and emits the doc pages/frames, swatches, specimens, matrices, and Do/Don't pairs. It is dispatched directly by the command on `/setup` (all foundations + components) and on `/extend` (one component doc frame), and runs `figc` itself to build them.
+- **`figc-operator`** — the **canonical** Figma operator and owner of the figc conventions (per the architecture roster). `figma-doc-builder` is one of the two specialized workers that run `figc` directly under those same conventions, so its Figma writes — creating pages/frames/auto-layout/text, placing component instances, binding token swatches, and screenshotting to verify — follow figc-operator's rules exactly (bind tokens, never resize, shot-verify) without being routed through it.
 
 ### 9.2 figc mechanics
 

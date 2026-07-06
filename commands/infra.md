@@ -27,7 +27,7 @@ Write the pipeline plan, including the `figc tokens export` prerequisite check a
 
 Run in order; code writes land on the agreed branch, never `main`.
 
-1. `@design-system-wizard:token-exporter` — run `figc tokens export` (via `figc-operator`) to produce the DTCG JSON (`primitives.json`, `semantic.light.json`, `semantic.dark.json`), aliases preserved as references.
+1. `@design-system-wizard:token-exporter` — runs `figc tokens export` itself (the read-only export worker, under the figc conventions) to produce the DTCG JSON (`primitives.json`, `semantic.light.json`, `semantic.dark.json`), aliases preserved as references.
 2. `@design-system-wizard:sd-builder` — configure Style Dictionary **v4**: `css/variables` format, `outputReferences: true` (so aliases emit `var(--…)` chains, not inlined values), `name/kebab` transform, and per-mode output → `:root` (light) and `.dark` (dark) blocks.
 3. `@design-system-wizard:component-generator` — wire shadcn/Radix components to the **semantic** token layer via Tailwind (semantic CSS variables, never primitives, never hex).
 4. `@design-system-wizard:storybook-builder` — build Storybook stories as examples-as-data.

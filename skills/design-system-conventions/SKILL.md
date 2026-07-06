@@ -85,8 +85,11 @@ proven skeletons:
 - **Never hardcode colors** — bind semantic tokens (`figc bind`).
 - **Never resize instances** — use `figc place`.
 - After any canvas change, **`figc shot`** the node and inspect it.
-- All Figma reads/writes go through the `figc-operator` agent — no other agent
-  touches Figma directly.
+- `figc-operator` is the **canonical Figma operator** and owner of these
+  conventions. Two specialized workers also run `figc` directly under them —
+  `figma-doc-builder` (canvas docs) and `token-exporter` (read-only export); every
+  other agent stays off Figma and has its Figma work dispatched to `figc-operator`
+  by the invoking command (agents can't dispatch each other).
 
 ## The universal contract
 

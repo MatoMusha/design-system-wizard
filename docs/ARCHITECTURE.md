@@ -194,13 +194,13 @@ dimension.
 
 | Agent | Used by | Responsibility |
 |---|---|---|
-| `figc-operator` | all | **Sole** Figma interface. Owns preconditions (`figc status`), conventions (bind semantic tokens, never resize, `figc shot`-verify), and the token-export routine. |
+| `figc-operator` | all | **Canonical** Figma operator + owner of the figc conventions (preconditions `figc status`, bind semantic tokens, never resize, `figc shot`-verify). Two specialized workers also run `figc` directly under these conventions — `figma-doc-builder` and `token-exporter`; every other agent stays off Figma (its Figma work is dispatched to `figc-operator` by the command). |
 | `brand-interviewer` | setup | Structured brand/context interview. |
 | `token-architect` | setup | Proposes two-tier token taxonomy + scales. |
 | `component-planner` | setup | Component inventory + doc plan. |
 | `token-writer` | setup, audit | Emits/edits DTCG token JSON. |
 | `doc-writer` | setup, extend | Writes Component Contract docs (code/web surface). |
-| `figma-doc-builder` | setup, extend, audit | Renders **canvas documentation** (foundation pages + component doc frames) from the manifest, via `figc-operator`. |
+| `figma-doc-builder` | setup, extend, audit | Renders **canvas documentation** (foundation pages + component doc frames) from the manifest, running `figc` itself under the figc conventions. |
 | `ds-scanner` | audit | Inventories an existing DS (design + code). |
 | `rubric-evaluator` | audit | Runs both convention checklists → scores. |
 | `fix-planner` / `fix-applier` | audit | Prioritized fix plan and its application. |

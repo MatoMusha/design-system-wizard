@@ -22,7 +22,7 @@ This command is **plan → approve → execute**. The plan phase writes nothing 
 
 ## Execute phase (only after approval)
 
-Run in order — each step depends on the last. All Figma access goes through `figc-operator`; all code writes land on a git branch, never `main`.
+Run in order — each step depends on the last. Figma access goes through `figc-operator` (the canonical operator) except the canvas-docs step, which `figma-doc-builder` runs itself under the same figc conventions; all code writes land on a git branch, never `main`.
 
 1. `@design-system-wizard:figc-operator` — build the `primitives` and `semantic` variable collections + Light/Dark modes; bind semantic tokens as aliases of primitives (never hardcoded colors); build **typography as real Figma text styles**; import the **Lucide** icon set as SVGs into the Icons foundation; build the base components. **Everything is Figma auto-layout with token-bound gap/padding on the 4px grid — never absolute-positioned, never overlapping** (per the Craft & Measurement Standard). After every canvas write, `figc shot`-verify and inspect.
 2. `@design-system-wizard:token-writer` — emit the DTCG token JSON (`primitives.json`, `semantic.light.json`, `semantic.dark.json`, `typography.json`) with aliases preserved as references.
