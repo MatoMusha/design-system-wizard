@@ -101,6 +101,8 @@ shadcn does not ship a spacing scale — it consumes **Tailwind's default 4px gr
 
 Heights are expressed as Tailwind `h-*` (`h-8`=32px, `h-9`=36px, `h-10`=40px). **Default control height = `h-9` (36px).**
 
+> Reconciliation: this table is shadcn's **verbatim** code target. Where the `component-craft/` catalog pins a different value, the craft spec wins (it is the plan of record for the generator). Notably the craft **lg control height is 44** (`h-11`, a 44×44 touch target), not shadcn's raw `h-10` (40); build to 44.
+
 | Component | sm | default | lg | icon |
 |---|---|---|---|---|
 | **Button** | `h-8` (32) | `h-9` (36) | `h-10` (40) | `size-9` (36²); also `icon-sm size-8`, `icon-lg size-10`, `icon-xs size-6` |

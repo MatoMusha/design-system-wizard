@@ -19,10 +19,10 @@ override rules.
 
 | token | height | h-pad | h-pad w/icon | icon-only | gap | icon | font (size/wt/lh) | radius |
 |---|---|---|---|---|---|---|---|---|
-| `xs` (opt) | 24 | 8 | 6 | 24×24 | 4 | 12 | 12 / 500 / 16 | 6 |
+| `xs` (opt) | 24 | 8 | 6 | 24×24 | 4 | 12 | 12 / 500 / 16 | 8 |
 | `sm` | 32 | 12 | 10 | 32×32 | 6 | 16 | 14 / 500 / 20 | 8 |
 | **`default`** | **36** | 16 | 12 | 36×36 | 8 | 16 | 14 / 500 / 20 | 8 |
-| `lg` | 44 | 24 | 20 | 44×44 | 8 | 20 | 16 / 500 / 24 | 10 |
+| `lg` | 44 | 24 | 20 | 44×44 | 8 | 20 | 16 / 500 / 24 | 8 |
 
 `link` variant ignores the height/padding/radius columns (inline text).
 

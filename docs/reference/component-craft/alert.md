@@ -36,7 +36,7 @@ Foundation: shadcn/Radix + Tailwind, 4px grid. Backing: native `div role="alert"
 - title single line `line-clamp-1 min-h-4 font-medium tracking-tight`; description muted-foreground, `gap-1` between block children, `[&_p]:leading-relaxed`.
 - border always 1px `border-border` (destructive does not recolor it).
 - destructive text = the destructive token (text sits on card bg; destructive-foreground is NOT used).
-- radius fixed 8 (`rounded-lg`), never pill; width 100%.
+- radius fixed 8 (`rounded-md` = `--radius-md`), never pill; width 100%.
 
 ## Tokens consumed (semantic only)
 

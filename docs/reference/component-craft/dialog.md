@@ -36,7 +36,7 @@ All: bg background · text foreground · border border.
 
 - render in a portal; lock body scroll while open (Radix). Center via `fixed top-50%/left-50% + translate -50%/-50%`.
 - mobile gutter `max-w-[calc(100%-2rem)]` (16 each side); `sm:max-w-lg` (512) above.
-- content radius 8 (`rounded-lg`); pad 24 (`p-6`); internal gap 16 (`gap-4`).
+- content radius 8 (`rounded-md` = `--radius-md`); pad 24 (`p-6`); internal gap 16 (`gap-4`).
 - close = Lucide X currentColor `size-4` (16) stroke 1.5–2 + `span.sr-only "Close"`; ≥44×44 hit area.
 - DialogTitle REQUIRED for `aria-labelledby` (Radix warns if absent); DialogDescription drives `aria-describedby`.
 - footer stacks reversed on mobile (primary on top), right-aligns in a row on sm+.

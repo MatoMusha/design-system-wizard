@@ -51,7 +51,7 @@ Anatomy: root (relative flex, overflow-hidden, rounded-full, shrink-0) · image 
 
 ## Overrides (skeleton → change when)
 
-- radius full → 8 (`rounded-lg`, squircle) for an org/brand/entity instead of a person.
+- radius full → 8 (`rounded-md`, squircle) for an org/brand/entity instead of a person.
 - box sizes → 20/28/36 for a compact table or comment-thread.
 - ring-color background → primary/destructive/chart token when encoding presence/status/selection.
 - overlap offset (`-space-x`) → pair magnitude with ring width so the gap stays visible.

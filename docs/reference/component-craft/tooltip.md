@@ -6,7 +6,7 @@ Foundation: shadcn/Radix + Tailwind, 4px grid. Backing: Radix Tooltip (`Provider
 
 | variant | bg | text | border | notes |
 |---|---|---|---|---|
-| default (inverse) | primary | primary-foreground | none | shadcn ships this only; high-contrast chip, arrow fill-primary |
+| default (inverse) | primary | primary-foreground | none | high-contrast chip, arrow fill-primary. (shadcn's own default is `foreground`/`background`; this catalog grounds the inverse on `primary` for brand tint — swap to `foreground`/`background` for a neutral inverse) |
 | surface (on-canvas) | popover | popover-foreground | border | opt-in for light-on-light; 1px border, arrow fill-popover + border edge |
 
 ## Measurements (px)

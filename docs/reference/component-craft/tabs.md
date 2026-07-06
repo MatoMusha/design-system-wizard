@@ -36,7 +36,7 @@ Foundation: shadcn/Radix + Tailwind, 4px grid. Backing: Radix Tabs (`Root/List/T
 - labels `whitespace-nowrap`; never wrap a trigger.
 - default variant: triggers `flex-1` (equal-width segmentation); line variant: intrinsic width.
 - icons Lucide currentColor `size-16 shrink-0 pointer-events-none`.
-- nested radius: list `rounded-lg` 8, trigger `rounded-md` 6 (line variant both `rounded-none`).
+- nested radius: list `rounded-md` 8, trigger `rounded-sm` 6 (line variant both `rounded-none`).
 - transition `transition-all 150ms ease`; content spacing via root `flex gap 8` (not trigger margin).
 - coarse/touch pointer: promote list to lg (44) for the hit target.
 - automatic activation: arrow keys move + select; roving tabindex. Sentence-case labels, no all-caps.
@@ -48,7 +48,7 @@ Foundation: shadcn/Radix + Tailwind, 4px grid. Backing: Radix Tabs (`Root/List/T
 ## Overrides (skeleton → change when)
 
 - list height → density sm 32 / default 36 / lg 44.
-- list+trigger radius → line variant `rounded-none` + 2px underline; default `rounded-lg 8 / rounded-md 6`.
+- list+trigger radius → line variant `rounded-none` + 2px underline; default `rounded-md 8 / rounded-sm 6`.
 - active treatment → default (bg-background + shadow-sm) vs line (foreground underline only).
 - trigger width → default `flex-1`; line content-width.
 - hit area → bump list to lg 44 on coarse pointer.
