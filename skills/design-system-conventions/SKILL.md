@@ -62,6 +62,13 @@ proven skeletons:
 - **`${CLAUDE_PLUGIN_ROOT}/docs/reference/foundations-structure.md`** — the
   foundations organization, the **size-token family** (control heights as tokens),
   the radius role hierarchy, and the 4px spacing ladder.
+- **`${CLAUDE_PLUGIN_ROOT}/docs/reference/component-craft/`** — the **component-craft
+  catalog**: per-component build specs (exact variant matrix + size table with
+  height/padding/icon-gap/font/radius in px, state + focus recipe, touch-target
+  rules), e.g. `button.md`. Spec-only, numbers and tokens. It is the **skeleton
+  default** — the `/setup` + `/extend` interviews override any value via each spec's
+  `Overrides` block (see the catalog `README.md`). Where a craft spec exists for a
+  component, it is the plan of record; `shadcn-skeleton.md` covers the rest.
 
 ## The token spine (two-tier + parity)
 
