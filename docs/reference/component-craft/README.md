@@ -40,4 +40,15 @@ research reconciled to a shadcn/Radix + Tailwind + 4px-grid foundation.
 
 ## Catalog
 
-- [`button.md`](./button.md) — Button
+**Action** · [`button.md`](./button.md)
+**Data input** · [`input.md`](./input.md) · [`textarea.md`](./textarea.md) · [`label.md`](./label.md) · [`select.md`](./select.md) · [`checkbox.md`](./checkbox.md) · [`radio-group.md`](./radio-group.md) · [`switch.md`](./switch.md)
+**Container** · [`card.md`](./card.md) · [`separator.md`](./separator.md)
+**Feedback** · [`badge.md`](./badge.md) · [`alert.md`](./alert.md) · [`tooltip.md`](./tooltip.md)
+**Navigation** · [`tabs.md`](./tabs.md)
+**Overlay** · [`dialog.md`](./dialog.md)
+**Media** · [`avatar.md`](./avatar.md)
+
+16 core components. All specs anchored to the locked skeleton (control-height family
+sm 32 / default 36 / lg 44, radius 8, universal 3px focus ring, 4px grid, Lucide
+icons, ≥44px touch target) and cross-checked against shadcn/Radix, Material 3,
+Polaris, Primer, Apple HIG, Tailwind, and Ant.
