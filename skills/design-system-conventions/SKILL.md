@@ -31,10 +31,14 @@ below rather than reproducing its contents from memory — the docs are canonica
    Documentation rendered **on the Figma canvas** in a canonical file structure
    (`Cover · Foundations · Components · Patterns`): foundation pages (Color,
    Typography specimens from real text styles, Spacing, Radius, Elevation, Icons)
-   and each component as its own auto-layout doc card on an organized Components
-   page — never scattered, never overlapping. Canvas and code docs are two
-   projections of one source, kept in sync by a `sourceHash` freshness rule.
-   Evaluated by the **Canvas Documentation Checklist** (with a staleness gate).
+   and **one page per component** — every component gets its own designed
+   documentation page with **use-case frames** (real instances + explanatory text
+   showing how to use it): usage demonstrated in realistic context, not a bare
+   spec/API dump. An optional **Markdown usage guide** per component may accompany the
+   canvas page for readability. Within every page, craft still holds (auto-layout,
+   token-bound spacing, no overlaps). Canvas and code docs are two projections of
+   one source, kept in sync by a `sourceHash` freshness rule. Evaluated by the
+   **Canvas Documentation Checklist** (with a staleness gate).
 
 4. **Craft & Measurement Standard** — `${CLAUDE_PLUGIN_ROOT}/docs/conventions/craft-and-measurement.md`
    How the system becomes *actually good*, not just good-looking. Core rules:
@@ -84,7 +88,9 @@ proven skeletons:
 - **Parity is a hard requirement:** a token's identifier must survive every hop
   (Figma name → DTCG path → CSS `--var` → Tailwind/React identifier → Storybook)
   unchanged. The **parity map** in `ds-manifest.json` records it; `parity-verifier`
-  fails the build on drift.
+  fails the build on drift. Parity is enforced as a **deterministic lint** — a
+  reproducible, CI-wireable check that emits an exit code + a structured JSON drift
+  report (the same string-identity assertions, runnable outside an agent).
 
 ## figc conventions (all Figma access)
 
@@ -104,6 +110,28 @@ Every command is **plan → approve → execute**. The plan phase is read-only a
 ends in a written plan + STOP. Nothing is generated, written, or pushed until the
 human explicitly approves. New semantic tokens are always surfaced in the plan,
 never invented silently. Code writes go to a branch, never `main`.
+
+## Figma-first sequencing (the Figma Readiness Gate)
+
+**Figma has priority: the design work happens in Figma first, and code follows.**
+The design-to-code pipeline (`/infra`) and any component addition (`/extend`) must
+not run until the Figma file is in a **solid state**. That state is asserted by the
+**Figma Readiness Gate** — a deterministic, binary check evaluated from figc facts
+(gathered via `figc-operator`/`ds-scanner`, scored by a fixed pass/fail rule, not by
+judgment):
+
+| Criterion | Passes when |
+|---|---|
+| **Variables** | `primitives` + `semantic` collections exist, and every semantic role resolves to a value in **every chosen mode** (Light/Dark). |
+| **Text styles** | Typography exists as **real Figma text styles** (not raw variables). |
+| **Foundations** | The Foundations pages are built (Color, Typography, Spacing, Radius, Elevation, Icons). |
+| **Core components** | The base component inventory is built in Figma as real components/variants. |
+
+The gate answers one question: *"can we generate code from this file yet?"* If any
+criterion fails, the command **stops and points back to `/setup`** — it never
+half-generates code from an unsolid file. This gate is the minimum bar; the fuller
+**Figma-Documented bar** (one page per component, every component documented
+usage-first — checked by `/audit`) is a higher standard on top of it.
 
 ## Shared state
 

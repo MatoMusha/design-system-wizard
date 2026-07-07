@@ -126,16 +126,25 @@
             }
           }
         },
-        "componentFrames": {
+        "componentPages": {
           "type": "array",
+          "description": "One dedicated documentation page per component (usage-first). Each component has its own page; never many components on one page.",
           "items": {
             "type": "object",
-            "required": ["component", "frameId"],
+            "required": ["component", "pageId"],
             "additionalProperties": false,
             "properties": {
               "component": { "type": "string" },
-              "frameId": { "type": "string" },
-              "sourceHash": { "type": "string" }
+              "pageId": { "type": "string", "description": "The component's own Figma documentation page node id." },
+              "frameId": { "type": "string", "description": "Root doc frame on the page." },
+              "sourceHash": { "type": "string", "description": "Hash of the source slice; /audit fails stale pages." },
+              "useCaseCount": { "type": "integer", "minimum": 0, "description": "Number of use-case frames on the page; must be >= 1 (C-CMP-6)." },
+              "variantsShown": { "type": "integer", "minimum": 0 },
+              "variantsExpected": { "type": "integer", "minimum": 0 },
+              "doCount": { "type": "integer", "minimum": 0 },
+              "dontCount": { "type": "integer", "minimum": 0 },
+              "contractRef": { "type": "string" },
+              "usageGuideRef": { "type": "string", "description": "Optional Markdown usage guide path; kept fresh by sourceHash when present." }
             }
           }
         }

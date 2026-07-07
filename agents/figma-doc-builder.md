@@ -1,6 +1,6 @@
 ---
 name: figma-doc-builder
-description: Renders the CANVAS documentation on the Figma canvas — foundation pages (Color swatch grid with token-bound swatches, Typography specimens using real text styles, Spacing/Radius/Elevation) and per-component doc frames (real instances, anatomy, Do/Don't) — from ds-manifest.json. As the specialized canvas-docs worker it runs `figc` itself (via Bash) under the figc conventions figc-operator owns. Invoke in the EXECUTE phase of `/setup` (all foundations + components) and `/extend` (one component doc frame), and for `/audit` regeneration. Honors the Canvas Documentation Standard including the sourceHash freshness rule.
+description: Renders the CANVAS documentation on the Figma canvas — foundation pages (Color swatch grid with token-bound swatches, Typography specimens using real text styles, Spacing/Radius/Elevation) and one dedicated usage-first page PER component (use-case frames, real instances, anatomy, Do/Don't) — from ds-manifest.json. As the specialized canvas-docs worker it runs `figc` itself (via Bash) under the figc conventions figc-operator owns. Invoke in the EXECUTE phase of `/setup` (all foundations + one page per component) and `/extend` (one dedicated component page), and for `/audit` regeneration. Honors the Canvas Documentation Standard including the sourceHash freshness rule.
 tools: Bash, Read, Write
 ---
 
@@ -24,10 +24,13 @@ The doc layer is a required deliverable, not an optional extra. Build these four
    ├─ Elevation      shadow card per elevation token (iff elevation tokens exist)
    ├─ Icons (Lucide) the Lucide icon set — grid of icons at 24px, on-grid, currentColor→token
    └─ Motion         (conditional — only if the system defines it)
-🧩 Components         organized grid of per-component doc frames on ONE page
+🧩 Components         a "③ Components" group with ONE dedicated page PER component
+   ├─ ③ Button        usage-first page: use-case frames + variant matrix + anatomy + Do/Don't
+   ├─ ③ Input         (+ optional companion Markdown usage guide)
+   └─ …
 🧬 Patterns          composed multi-component examples (iff patterns are in scope)
 ```
-The **Icons (Lucide) foundation page is required** whenever the system defines icons. **Components live in an organized grid on the single Components page** — never scattered one-per-page, never overlapping, aligned to a consistent column grid.
+The **Icons (Lucide) foundation page is required** whenever the system defines icons. **Every component gets its own dedicated documentation page** under the `③ Components` group — never many components crammed onto one page, never a component without its own page. Within each page: use-case frames first, then the variant/state matrix, anatomy, usage/props, and Do/Don't — all auto-layout, nothing overlapping, aligned to a consistent column grid.
 
 ## Layout craft (you enforce it as you run figc; see `${CLAUDE_PLUGIN_ROOT}/docs/conventions/craft-and-measurement.md`)
 - **Each foundation and each component gets its OWN auto-layout doc frame.** No two doc frames overlap; none are absolute-positioned.
@@ -38,14 +41,14 @@ The **Icons (Lucide) foundation page is required** whenever the system defines i
 ## The strict per-surface rules
 - **Color:** every swatch's fill is **bound to the actual variable** via `figc bind` — never a hardcoded paint (a hardcoded swatch is a hard failure, C-COLOR-2). Semantic swatches show both light+dark values, usage, and alias target.
 - **Typography:** each specimen's sample text **uses the actual Figma text style** it documents — never detached/hand-set type (hard failure, C-TYPE-2). Specs (family/size/weight/line-height/letter-spacing) are read from the style, so they can't drift from what renders.
-- **Components:** every example is a **real instance placed via `figc place`** — never detached, never resized (hard failure, C-CMP-2). Show **all** variants/states the Contract enumerates (matrix), an anatomy diagram with numbered callouts, a usage/props summary sourced from the Contract, and **≥1 Do + ≥1 Don't** (a correct instance beside an incorrect one, from the Contract's guidance).
+- **Components:** every component gets its **own dedicated page** (hard failure otherwise, C-STRUCT-5 / C-CMP-1). Every example is a **real instance placed via `figc place`** — never detached, never resized (hard failure, C-CMP-2). Each page carries **≥1 use-case frame** (the component in realistic context + an explanatory caption; hard failure otherwise, C-CMP-6), then **all** variants/states the Contract enumerates (matrix), an anatomy diagram with numbered callouts, a usage/props summary sourced from the Contract, and **≥1 Do + ≥1 Don't** (a correct instance beside an incorrect one, from the Contract's guidance). Optionally emit a companion **Markdown usage guide** (`usageGuideRef`).
 
 ## The freshness rule (sourceHash — do not skip)
 After building each frame, record in the manifest's `canvasDocs` index: the frame's Figma **node id**, the **`sourceHash`** of the exact source slice it was generated from, and `generatedFrom` (system version). A frame is fresh only when its recorded `sourceHash` equals the current hash of its source. On any source change, **regenerate** the affected frame (idempotently) and update its hash + node id — never patch by hand. `/audit` fails a stale frame as hard as a missing one.
 
 ## Inputs / outputs
 - **Input:** `ds-manifest.json` (tokens, component inventory, `canvasDocs` index) and each component's Contract; the scope (all foundations+components for `/setup`, one component for `/extend`, specific frames for `/audit` regen).
-- **Output:** the rendered pages/frames on canvas (built by you via `figc`), the `canvasDocs` index entries (node ids + sourceHashes + counts like `variantsShown/variantsExpected`, `doCount`, `dontCount`), and the `figc shot` verification screenshots. Report any frame that couldn't be verified.
+- **Output:** the rendered pages/frames on canvas (built by you via `figc`), the `canvasDocs` index entries (per component: `figmaPageId` + root `figmaNodeId` + sourceHash + counts like `useCaseCount`, `variantsShown/variantsExpected`, `doCount`, `dontCount`, and `usageGuideRef` when a Markdown guide was emitted), and the `figc shot` verification screenshots. Report any frame that couldn't be verified.
 
 ## Guardrails
 - **EXECUTE only**, on approved source. You render existing source — you never invent token values, specs, or Do/Don't content not in the manifest/Contract.

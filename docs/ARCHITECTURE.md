@@ -21,8 +21,13 @@ Radix + Tailwind → Storybook).
 2. **No arbitrary decisions.** Where a real choice exists (naming, tooling, repo
    strategy, token structure), it is surfaced in the plan and asked — never
    decided silently. Clarifying questions are batched into one focused round.
-3. **Figma is the source of truth.** Tokens flow design → code, one way. Code is
-   generated; the pipeline never writes tokens back into Figma.
+3. **Figma is the source of truth — and comes first.** Tokens flow design → code,
+   one way. Code is generated; the pipeline never writes tokens back into Figma.
+   **Code follows a solid Figma file, never precedes it:** `/infra` and `/extend`
+   are blocked by the **Figma Readiness Gate** (foundations + core components +
+   variables/text styles resolved in every chosen mode) and refuse to run until the
+   Figma file is solid. `/audit` assesses the Figma file *first* — readiness and
+   per-component documentation completeness are its headline.
 4. **Design ↔ code name-parity is a hard requirement.** A token's identifier
    must survive every hop unchanged. This is verified, not hoped for.
 5. **The design system must be agent-readable.** Authored to a machine-consumable
@@ -44,22 +49,32 @@ Each is a plan→approve→execute skill that dispatches worker agents.
   overlapping), and builds **typography as real Figma text styles** (not raw
   variables); `token-writer` emits DTCG token JSON; `doc-writer` scaffolds
   Component Contract docs; `figma-doc-builder` renders the **canvas documentation**
-  into the canonical file structure; `craft-reviewer` runs the **craft-QA loop**
-  until the Craft Checklist passes. Writes `ds-manifest.json`.
+  into the canonical file structure — foundation pages + **one dedicated
+  usage-first page per component** (use-case frames + matrix + anatomy + Do/Don't,
+  optional Markdown usage guide); `craft-reviewer` runs the **craft-QA loop**
+  until the Craft Checklist passes. Writes `ds-manifest.json`. **Exit criterion:
+  the Figma file is left in the solid state the Readiness Gate requires** — this is
+  what unblocks `/infra`.
 
-### `/audit` — audit an existing design system
-- **Plan:** `ds-scanner` inventories what exists (Figma vars via `figc-operator`
-  + code tokens/components) → `rubric-evaluator` scores against the shared
-  conventions, producing the **Component Contract Evaluation Checklist** results,
-  the **Agent-Readability Score**, and the **Canvas Documentation Checklist**
-  (including the staleness gate) → `fix-planner` returns a report + prioritized
-  fix plan. → STOP.
+### `/audit` — audit an existing design system (Figma-first)
+- **Plan:** assesses the **Figma file first** — the **Figma Readiness Gate**
+  verdict (solid / not solid) and **per-component documentation completeness**
+  (every component on its own page, usage-first with use-case frames) are the
+  headline. `ds-scanner` inventories what exists (Figma via `figc-operator` + code
+  tokens/components, flagging whether a code layer exists at all) → `craft-reviewer`
+  returns Craft findings → `rubric-evaluator` scores the **Canvas Documentation
+  Checklist** (staleness + one-page-per-component), the **Craft Checklist**, the
+  **Agent-Readability Score**, and — **only where a code layer exists** — the
+  **Component Contract Evaluation Checklist** + parity lint (else `not-yet-generated`)
+  → `fix-planner` returns a report + prioritized fix plan (Figma gaps first). → STOP.
 - **Execute (on approval):** `fix-applier` agents run per fix category, reusing
   `figc-operator` / `token-writer`. Annotates `ds-manifest.json`.
 
 ### `/extend` — grow an existing system by a component *(→ [spec](specs/extend-command.md))*
 The distinguishing flow: **context-of-use interview → UX/UI pattern research →
-execute**, conforming to the system's standard.
+execute**, conforming to the system's standard. **Hard precondition: the Figma
+Readiness Gate passes** (a component is added onto a solid Figma foundation, never
+before one exists); its canvas output is the component's **own dedicated page**.
 - **Plan:** `context-interviewer` (adaptive, batched interview → context brief) →
   `ux-pattern-researcher` (common patterns, anatomy, keyboard/a11y per WAI-ARIA
   APG, confirms backing Radix/shadcn primitive) → synthesized component proposal
@@ -73,13 +88,19 @@ execute**, conforming to the system's standard.
   QA loop → manifest + parity update → `parity-verifier`.
 
 ### `/infra` — build the design-to-code pipeline *(→ [export spec](specs/figma-dtcg-export.prompt.md))*
-- **Plan:** `repo-strategist` (existing GitHub repo vs provision new; branching)
-  → `pipeline-designer` (the full chain with the parity contract explicit). →
-  STOP.
+Code is an **outcome of `/infra`'s planning**, gated on a solid Figma file.
+- **Preflight:** the **Figma Readiness Gate** runs first and **blocks** the whole
+  command until the Figma file is solid (else → back to `/setup`).
+- **Plan:** asks up front **existing repo or not** — *No* → `repo-strategist` plans
+  a fresh repo from scratch; *Yes* → it inspects the given repo first-hand and
+  suggests a fitting plan. Then `pipeline-designer` (the full chain with the parity
+  contract explicit). → STOP.
 - **Execute (on approval):** `token-exporter` (figc → DTCG JSON) → `sd-builder`
   (Style Dictionary v4: `css/variables`, `outputReferences: true`, `name/kebab`)
   → `component-generator` (shadcn/Radix wired to semantic tokens) →
-  `storybook-builder` → `parity-verifier` asserts string-identity at every hop.
+  `storybook-builder` → `parity-verifier` runs the **deterministic parity lint**
+  (exit code + JSON drift report, wired as a CI step) asserting string-identity at
+  every hop.
 
 ---
 
@@ -112,8 +133,9 @@ Referenced by all four commands: `/setup` builds *to* them, `/audit` scores
   rendered **on the Figma canvas**. Defines a Foundations area with a doc frame
   per foundation — **Color** (token-bound swatch grid), **Typography** (a
   specimen per real Figma text style), Spacing, Radius/Shape, Elevation, and
-  conditional Iconography/Motion — plus a component doc frame per component
-  (real placed instances across variants, anatomy callouts, Do/Don't pairs).
+  conditional Iconography/Motion — plus **one dedicated page per component**
+  (usage-first: use-case frames showing how to use it in context, a variant
+  matrix, anatomy callouts, Do/Don't pairs, optional Markdown usage guide).
   Both surfaces are projections of one source (`ds-manifest.json` + Contract),
   kept in sync by a `sourceHash` freshness rule. Ships the **Canvas
   Documentation Checklist** (with a staleness gate) that `/audit` runs.
@@ -200,7 +222,7 @@ dimension.
 | `component-planner` | setup | Component inventory + doc plan. |
 | `token-writer` | setup, audit | Emits/edits DTCG token JSON. |
 | `doc-writer` | setup, extend | Writes Component Contract docs (code/web surface). |
-| `figma-doc-builder` | setup, extend, audit | Renders **canvas documentation** (foundation pages + component doc frames) from the manifest, running `figc` itself under the figc conventions. |
+| `figma-doc-builder` | setup, extend, audit | Renders **canvas documentation** (foundation pages + **one dedicated usage-first page per component**, with use-case frames) from the manifest, running `figc` itself under the figc conventions. |
 | `ds-scanner` | audit | Inventories an existing DS (design + code). |
 | `rubric-evaluator` | audit | Runs both convention checklists → scores. |
 | `fix-planner` / `fix-applier` | audit | Prioritized fix plan and its application. |
@@ -210,7 +232,7 @@ dimension.
 | `sd-builder` | infra | Style Dictionary config + build. |
 | `component-generator` | extend, infra | shadcn/Radix component wired to semantic tokens. |
 | `storybook-builder` | extend, infra | Storybook stories (examples-as-data). |
-| `parity-verifier` | extend, infra, audit | Guardian of design↔code name parity. |
+| `parity-verifier` | extend, infra, audit | Guardian of design↔code name parity — a **deterministic, CI-wireable lint** (exit code + JSON drift report). |
 | `craft-reviewer` | setup, extend, audit | Visual-QA loop: `figc shot` → inspect against the Craft Checklist (overlaps, off-grid, hierarchy, contrast) → loop fixes through `figc-operator` until it passes. |
 
 ---
@@ -246,6 +268,10 @@ prerequisite for `/infra`. Build order:
 ## 8. Gates & safety
 
 - Two-phase (plan → STOP → execute) on every command.
+- **Figma-first gate:** `/infra` and `/extend` are blocked by the **Figma Readiness
+  Gate** (deterministic: foundations + core components + variables/text styles
+  resolved in every chosen mode) — no code work until the Figma file is solid.
 - `figc shot`-verify checkpoint after every Figma write.
 - Git-branch-only for any code write — never commit to `main` directly.
 - New semantic tokens are always surfaced in the plan; never invented silently.
+- **Parity is a deterministic lint** (exit code + JSON drift report), CI-wireable.

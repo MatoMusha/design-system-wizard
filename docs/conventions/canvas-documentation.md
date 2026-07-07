@@ -2,7 +2,7 @@
 
 **Status:** Normative standard for `design-system-wizard`
 **Applies to:** every foundation and every component in a design system managed by this plugin
-**Consumed by:** `/setup` (emits foundation + component doc pages), `/extend` (emits a doc frame per new component), `/audit` (scores via the **Canvas Documentation Checklist**, §11)
+**Consumed by:** `/setup` (emits foundation frames + one page per component), `/extend` (emits a dedicated page per new component), `/audit` (scores via the **Canvas Documentation Checklist**, §11)
 **Related conventions:** [Component Contract](./component-contract.md) · [Craft & Measurement](./craft-and-measurement.md) · [Agent-Readability](./agent-readability.md)
 **Built by:** `figma-doc-builder` — the specialized canvas-docs worker, which runs `figc` itself under the conventions `figc-operator` owns
 
@@ -10,9 +10,11 @@
 
 ## 0. Mandatory and non-skippable
 
-The canvas documentation layer is **always built** — it is not an optional finishing step, and no run of `/setup` or `/extend` is complete without it. `figma-doc-builder` **MUST** emit the full canonical file structure (§2) on every `/setup`, and append a conformant doc card on every `/extend`. There is no mode, flag, or shortcut that skips it.
+The canvas documentation layer is **always built** — it is not an optional finishing step, and no run of `/setup` or `/extend` is complete without it. `figma-doc-builder` **MUST** emit the full canonical file structure (§2) on every `/setup`, and append a conformant **per-component documentation page** on every `/extend`. There is no mode, flag, or shortcut that skips it.
 
-`/audit` treats a **missing** doc layer, a **stale** doc layer, or a **structurally wrong** doc layer (scattered components, overlapping frames, absolute positioning, missing canonical pages) as a **hard failure** — not a warning (§11). "The tokens and components exist but the Foundations/Components pages were never built" is exactly the failure this standard exists to prevent.
+**One page per component (usage-first).** Every component is documented on its **own dedicated page** — a *designed documentation page*, not a bare spec card: it shows the component in **use-case frames** (real instances placed in realistic context, with explanatory text showing briefly how to use it), alongside its variant/state matrix, anatomy, usage/props summary, and Do/Don't. The defining move is that **usage is demonstrated in context first**, the way a mature reference design system documents each component — not reduced to a variant grid or an API table. An optional companion **Markdown usage guide** may accompany the page for readability.
+
+`/audit` treats a **missing** doc layer, a **stale** doc layer, or a **structurally wrong** doc layer (a component with no page of its own, under-documented pages with no use-case frames, overlapping frames, absolute positioning, missing canonical pages) as a **hard failure** — not a warning (§11). "The tokens and components exist but the Foundations pages / per-component pages were never built" is exactly the failure this standard exists to prevent.
 
 Every doc frame **MUST also conform to [Craft & Measurement](./craft-and-measurement.md)**: auto-layout only (nothing absolute-positioned, nothing overlapping), all spacing/padding/gaps bound to `space/*` tokens on the 4px base, consistent outer margins, Lucide as the icon foundation, and the craft-verification loop (`figc shot` + inspect) run on every frame before it is considered done. This standard defines *what* the canvas docs contain and *how they are laid out at the file level*; Craft & Measurement defines the *pixel-level spatial discipline* every frame here must satisfy.
 
@@ -45,25 +47,28 @@ Canvas docs are **generated and regenerated** from the source, never hand-mainta
 
 ## 2. Canonical Figma file architecture (mandatory)
 
-The canvas docs occupy a **fixed, ordered set of top-level pages** in the Figma file. This structure is **canonical and mandatory** — `/setup` always emits exactly these pages in this order, `/extend` appends into them, and `/audit` locates every piece by page and name. Components are **never** scattered one-per-page; foundations are **never** left unbuilt. The ordered pages are:
+The canvas docs occupy a **fixed, ordered set of top-level pages** in the Figma file. This structure is **canonical and mandatory** — `/setup` always emits exactly these pages in this order, `/extend` appends a page per new component, and `/audit` locates every piece by page and name. **Every component has its own page**; foundations are **never** left unbuilt. The ordered pages are:
 
 ```
 ①  Cover                   (entry / index page, §8.3)
 ②  Foundations             (one doc frame per foundation, §3–§6 — Color, Type, Spacing, Radius, Elevation, Icons, Motion)
-③  Components              (ALL component doc cards, together, in one auto-layout grid, §7)
+③  Components  ──┐         (a divider / section header — the components group)
+    ├─ Button    │         one dedicated page PER component (§7), each usage-first
+    ├─ Input     │         with use-case frames + matrix + anatomy + Do/Don't
+    ├─ …         │
 ④  Patterns                (composed multi-component patterns / recipes — optional, present when the system defines any)
     Changelog              (optional — generated version history of the doc layer)
 ```
 
 | Page | Required | What lives here |
 |---|---|---|
-| **① Cover** | always | System name, version, and the linked index of every foundation frame and every component card (§8.3). The single entry surface. |
+| **① Cover** | always | System name, version, and the linked index of every foundation frame and **every component page** (§8.3). The single entry surface. |
 | **② Foundations** | always | One doc frame per foundation — Color, Typography, Spacing, Radius, Elevation, **Icons (Lucide)**, Motion — laid out on the shared grid (§2.1). Split into clearly-labelled sections on one page, or (only if the file is large) one page per foundation under a `②a Color`, `②b Type`… numbering that preserves order. |
-| **③ Components** | always | **Every** component doc card, together, in a single **auto-layout grid** (§7). One page for the whole library; split to one page **per category** only when the library is large enough to warrant it — never one page per component. |
-| **④ Patterns** | conditional | Composed, multi-component patterns/recipes (form layouts, page shells, empty states). Present when the manifest defines any pattern; each pattern is one doc card on the shared grid. |
+| **③ Components** | always | A **components group** (a `③ Components` section divider) under which **each component has its own dedicated page** — `③ Button`, `③ Input`, … Each page is a usage-first designed documentation page (§7): use-case frames, variant/state matrix, anatomy, usage/props, Do/Don't. **One page per component is required — never many components crammed onto one page, and never a component without its own page.** Pages are grouped/ordered by category where the library is large. |
+| **④ Patterns** | conditional | Composed, multi-component patterns/recipes (form layouts, page shells, empty states). Present when the manifest defines any pattern; each pattern gets its own page under a `④ Patterns` group, same as components. |
 | **Changelog** | optional | A generated record of doc-layer versions/regenerations. |
 
-The page numbering prefix (`①②③④`) is part of the name so the pages sort in canonical order and `/audit` can assert their presence and sequence. Every leaf frame on these pages is a **documentation frame / doc card** built from the reusable template in §8, and every one conforms to Craft & Measurement (auto-layout, token-bound spacing, no overlaps).
+The page numbering prefix (`①②③④`) is part of the name so the pages sort in canonical order and `/audit` can assert their presence and sequence; component pages carry the `③` prefix so they group and sort under Components. Every leaf frame on these pages is a **documentation frame** built from the reusable template in §8, and every one conforms to Craft & Measurement (auto-layout, token-bound spacing, no overlaps).
 
 ### 2.1 One consistent layout grid (all doc pages and frames)
 
@@ -71,7 +76,7 @@ Every doc page and every doc frame shares **one layout system** — the docs mus
 
 - **Fixed outer margins:** a consistent outer padding on every page/frame — default **`space/1600` (64px)** — identical on all four sides. No frame hugs the edge; no frame floats at an arbitrary offset.
 - **Column grid:** a shared column grid (e.g. 12 columns with a token-bound gutter) that all doc frames align to. Foundation specimens and component cards snap to column boundaries; nothing is nudged by eye.
-- **Consistent section spacing:** the vertical rhythm between frames and between sections is a single spacing token (default **`space/1200` (48px)** between doc cards, **`space/800` (32px)** between sections within a frame) — never ad-hoc gaps.
+- **Consistent section spacing:** the vertical rhythm between frames and between sections is a single spacing token (default **`space/1200` (48px)** between stacked doc frames on a page, **`space/800` (32px)** between sections within a frame) — never ad-hoc gaps.
 - **Auto-layout only, no overlaps:** every page is organized with auto-layout containers and every frame is auto-layout (§8). **Nothing is absolute-positioned and no two frames overlap** — this is the Craft & Measurement rule, enforced here at the page level. Overlapping or free-floating frames are a **hard failure** (§11, C-STRUCT-5).
 
 All of the above are driven from the system's own **spacing tokens** (4px base) — there are no magic numbers in the doc layout itself, per §8.1.
@@ -176,25 +181,33 @@ A **shadow card** per elevation token: an identical surface carrying only that e
 
 ---
 
-## 7. Component documentation frames
+## 7. Component documentation pages (one page per component)
 
-### 7.0 Components page layout (organized, together, auto-layout grid)
+### 7.0 One dedicated page per component (usage-first)
 
-All component doc cards live **together on the ③ Components page** (or one page **per category** only when the library is large), arranged in a **single auto-layout grid** on the shared layout grid (§2.1). Each component gets **its own frame** — a **component doc card** — and the cards are laid into rows/columns by an auto-layout wrapper with token-bound gaps (default `space/1200` between cards). Cards are uniform in width and snap to the column grid.
+**Every component is documented on its own dedicated page** under the `③ Components` group (§2). The page is a *designed documentation page*, not a bare spec card: it demonstrates the component in realistic **use-case frames** and then documents its API and guidance. Each page is built from §8-template doc frames stacked with the shared grid (§2.1) — token-bound gaps (default `space/1200` between frames), consistent outer margins, everything auto-layout.
 
-**Explicitly forbidden (each a hard failure, §11):**
-- **One-component-per-page scattering** — a separate page per component instead of the organized grid.
-- **Overlapping frames** — any two doc cards (or their contents) intersecting.
-- **Absolute positioning / free-floating cards** — cards placed by raw x/y instead of flowing inside the auto-layout grid.
-- **Inconsistent margins/gaps** — cards with differing outer margins or ad-hoc spacing instead of the shared grid's token-bound rhythm.
+**Required — each is checked (§11):**
+- **One page per component** — a component without its own page is a **hard failure**; many components crammed onto one shared page is a **hard failure**.
+- **At least one use-case frame** — the component shown in realistic context with explanatory text (§7.0.1). A page that is only a variant grid with no use-case demonstration is under-documented and fails.
 
-Each **component doc card** is a doc frame (§8 template) that mirrors the component's **Component Contract** on the canvas and contains, in order:
+**Explicitly forbidden on a component page (each a hard failure, §11):**
+- **Overlapping frames** — any two frames (or their contents) intersecting.
+- **Absolute positioning / free-floating frames** — frames placed by raw x/y instead of flowing inside the page's auto-layout.
+- **Inconsistent margins/gaps** — ad-hoc spacing instead of the shared grid's token-bound rhythm.
+
+Each **component page** mirrors the component's **Component Contract** on the canvas and contains, in order:
 
 1. **Header** — component name, one-line description, status, APG pattern (from the Contract).
-2. **Variants & states matrix** — the component rendered **across all its variants and states** (e.g. every `variant` × `size`, plus hover/focus/disabled/loading where they are distinct visual states), each as a **real component instance**.
-3. **Anatomy diagram** — one instance with **numbered callouts** naming its parts (container, label, icon slot, focus ring…), matching the Contract's anatomy.
-4. **Usage / props summary** — a compact table of the key props (name · type · default) drawn from the Contract's `propsTable`, plus the canonical import. This is a *summary view* of the Contract, not a re-authored API.
-5. **Do / Don't** — at least **one Do and one Don't**, each a **correct instance placed next to an incorrect one**, with a short caption and rationale (sourced from the Contract's `guidance` node). The correct example uses bound tokens and real instances; the Don't visibly shows the anti-pattern.
+2. **Use-case frames** — the component placed in **realistic usage context** (a form row, a toolbar, a card header…), each as **real instances** with a short **explanatory caption** showing briefly how to use it. This is the usage-first heart of the page — usage shown, not just variants listed. At least one; more for components with distinct jobs.
+3. **Variants & states matrix** — the component rendered **across all its variants and states** (e.g. every `variant` × `size`, plus hover/focus/disabled/loading where they are distinct visual states), each as a **real component instance**.
+4. **Anatomy diagram** — one instance with **numbered callouts** naming its parts (container, label, icon slot, focus ring…), matching the Contract's anatomy.
+5. **Usage / props summary** — a compact table of the key props (name · type · default) drawn from the Contract's `propsTable`, plus the canonical import. This is a *summary view* of the Contract, not a re-authored API.
+6. **Do / Don't** — at least **one Do and one Don't**, each a **correct instance placed next to an incorrect one**, with a short caption and rationale (sourced from the Contract's `guidance` node). The correct example uses bound tokens and real instances; the Don't visibly shows the anti-pattern.
+
+### 7.0.1 Optional Markdown usage guide
+
+A component page **may** be accompanied by a **Markdown usage guide** (`docs/.../usage/<component>.md`) for readability — a prose companion to the canvas page. It is a *projection of the same source* (manifest + Contract), never a third hand-authored truth, and when present is indexed in the manifest (`usageGuideRef`, §10) and kept fresh by the same `sourceHash` rule. It is optional: its absence never fails the checklist; its **staleness**, when present, does.
 
 ### 7.1 Instance rules (normative)
 
@@ -202,12 +215,19 @@ Each **component doc card** is a doc frame (§8 template) that mirrors the compo
 - Every variant/state combination that the Contract enumerates MUST appear in the matrix. Missing combinations fail the coverage check (§11, C-CMP-3).
 - All fills/strokes visible in the frame are **token-bound**; the doc frame itself obeys the no-hardcoded-color rule.
 
-### 7.2 Component doc-frame skeleton
+### 7.2 Component page skeleton
 
 ```
-Frame: "Components / Button"   (auto-layout, vertical, gap = space/500)
-├─ Header
+Page: "③ Button"   (its own dedicated page; frames stacked on the shared grid §2.1)
+├─ Header frame
 │    Button · "Triggers an action or event" · stable · APG: Button
+├─ § Use cases                                     ← the usage-first heart
+│    ┌ use-case frame: "Primary action in a form"
+│    │   real <Button variant=primary> in a form row + caption "one primary per view"
+│    ├ use-case frame: "Secondary + primary pair in a dialog footer"
+│    │   real instances in a footer + caption "confirm primary, cancel secondary"
+│    └ use-case frame: "Icon button in a toolbar"
+│        real icon <Button> in a toolbar + caption "always give an aria-label"
 ├─ § Variants & states
 │    matrix of real <Button> instances:
 │    primary·secondary·ghost·destructive  ×  sm·md·lg
@@ -257,7 +277,7 @@ The **section order is fixed per doc type** (Color's regions, Typography's overv
 
 ### 8.3 Cover / index
 
-The **① Cover** page (§2) is the entry surface: system name, version, and a linked index of every foundation frame and every component doc card. It is regenerated whenever a page or card is added or removed, so the index never lists a page that does not exist (or omits one that does).
+The **① Cover** page (§2) is the entry surface: system name, version, and a linked index of every foundation frame and every component **page**. It is regenerated whenever a page is added or removed, so the index never lists a page that does not exist (or omits one that does).
 
 ---
 
@@ -265,7 +285,7 @@ The **① Cover** page (§2) is the entry surface: system name, version, and a l
 
 ### 9.1 Roles
 
-- **`figma-doc-builder`** — a dedicated agent role that **owns rendering the canvas docs from the manifest**. It reads a source slice (a foundation's tokens, or a component's Contract), and emits the doc pages/frames, swatches, specimens, matrices, and Do/Don't pairs. It is dispatched directly by the command on `/setup` (all foundations + components) and on `/extend` (one component doc frame), and runs `figc` itself to build them.
+- **`figma-doc-builder`** — a dedicated agent role that **owns rendering the canvas docs from the manifest**. It reads a source slice (a foundation's tokens, or a component's Contract), and emits the doc pages/frames, swatches, specimens, matrices, and Do/Don't pairs. It is dispatched directly by the command on `/setup` (all foundations + one page per component) and on `/extend` (one dedicated component page), and runs `figc` itself to build them.
 - **`figc-operator`** — the **canonical** Figma operator and owner of the figc conventions (per the architecture roster). `figma-doc-builder` is one of the two specialized workers that run `figc` directly under those same conventions, so its Figma writes — creating pages/frames/auto-layout/text, placing component instances, binding token swatches, and screenshotting to verify — follow figc-operator's rules exactly (bind tokens, never resize, shot-verify) without being routed through it.
 
 ### 9.2 figc mechanics
@@ -308,16 +328,17 @@ The canvas docs are indexed in `ds-manifest.json` so `/audit` can locate each fr
     { "foundation": "iconography","required": false, "figmaNodeId": null,     "sourceHash": null },
     { "foundation": "motion",     "required": false, "figmaNodeId": null,     "sourceHash": null }
   ],
-  "components": [
-    { "id": "cmp.button", "figmaNodeId": "34:12", "sourceHash": "sha256:aa10…",
-      "variantsShown": 12, "variantsExpected": 12, "doCount": 2, "dontCount": 2,
-      "contractRef": "contracts/button.json" }
+  "componentPages": [
+    { "component": "button", "pageId": "34:0", "frameId": "34:12", "sourceHash": "sha256:aa10…",
+      "useCaseCount": 3, "variantsShown": 12, "variantsExpected": 12, "doCount": 2, "dontCount": 2,
+      "contractRef": "contracts/button.json", "usageGuideRef": "docs/usage/button.md" }
   ]
 }
 ```
 
 - `sourceHash` is the hash of the exact source slice the frame was generated from (a foundation's token set; a component's Contract record). Freshness = recorded `sourceHash` equals the recomputed hash of the live source.
-- `figmaNodeId` lets `/audit` (via `figc-operator`) fetch and inspect the actual frame — e.g. to confirm swatches are bound and specimens use text styles.
+- `pageId` is the component's **own documentation page** (§7.0); `frameId` is the root doc frame on it. Both let `/audit` (via `figc-operator`) confirm the component has a dedicated page and inspect its frames.
+- `useCaseCount` records how many **use-case frames** the page carries (§7.0.1 check C-CMP-6); `usageGuideRef` points at the optional Markdown usage guide (§7.0.1) when one exists — `null`/absent when it does not.
 
 ---
 
@@ -328,13 +349,13 @@ The canvas docs are indexed in `ds-manifest.json` so `/audit` can locate each fr
 ### Presence & structure
 | ID | Type | Check |
 |---|---|---|
-| C-STRUCT-0 | **[blocker]** binary | The **canonical pages exist in order**: `① Cover`, `② Foundations`, `③ Components` (plus `④ Patterns` iff the system defines patterns). The doc layer was actually built — not skipped (§0, §2). |
-| C-STRUCT-1 | **[blocker]** binary | The **① Cover / index** page exists and lists exactly the foundation frames and component doc cards that exist (no missing, no phantom entries). |
+| C-STRUCT-0 | **[blocker]** binary | The **canonical pages exist in order**: `① Cover`, `② Foundations`, and a `③ Components` group with **one page per component** (plus `④ Patterns` iff the system defines patterns). The doc layer was actually built — not skipped (§0, §2). |
+| C-STRUCT-1 | **[blocker]** binary | The **① Cover / index** page exists and lists exactly the foundation frames and component **pages** that exist (no missing, no phantom entries). |
 | C-STRUCT-2 | **[blocker]** graded | **Every required foundation** (§3, incl. **Icons**) has a doc frame present (`figmaNodeId` non-null): fraction of required foundations present. |
 | C-STRUCT-3 | binary | Every **conditional** foundation that the system actually defines (motion/elevation tokens exist) has a doc frame present. |
 | C-STRUCT-4 | graded | Fraction of foundation/component frames whose sections appear **in the fixed order** for their doc type (§8.2). |
-| C-STRUCT-5 | **[blocker]** binary | **Components are together on the ③ Components page in one auto-layout grid** — not scattered one-per-page (§7.0). Fails if any component has its own dedicated page instead of a card in the grid. |
-| C-STRUCT-6 | **[blocker]** binary | **No overlapping frames** anywhere in the doc layer — no two doc cards/frames (or their contents) intersect, and none are absolute-positioned/free-floating outside the auto-layout flow (§2.1, §7.0). |
+| C-STRUCT-5 | **[blocker]** binary | **Every component has its own dedicated page** under `③ Components` (§7.0). Fails if any component lacks its own page, or if multiple components are crammed onto one shared page. |
+| C-STRUCT-6 | **[blocker]** binary | **No overlapping frames** anywhere in the doc layer — no two frames (or their contents) intersect, and none are absolute-positioned/free-floating outside the auto-layout flow (§2.1, §7.0). |
 | C-STRUCT-7 | graded | **Consistent margins & grid:** fraction of doc frames whose outer margins equal the standard (`space/1600`) and that align to the shared column grid with token-bound section spacing (§2.1). |
 | C-STRUCT-8 | **[blocker]** graded | **Auto-layout everywhere:** fraction of doc pages/frames organized with auto-layout (nothing absolute-positioned), per Craft & Measurement. |
 | C-STRUCT-9 | binary | The **Icons foundation is present and uses Lucide** — real Lucide icon instances in a grid, not pasted vectors (§6.4). |
@@ -369,11 +390,13 @@ The canvas docs are indexed in `ds-manifest.json` so `/audit` can locate each fr
 ### Component doc frames
 | ID | Type | Check |
 |---|---|---|
-| C-CMP-1 | **[blocker]** graded | Fraction of components in the inventory that have a **doc frame** (`figmaNodeId` non-null). |
-| C-CMP-2 | **[blocker]** graded | Fraction of component doc frames whose examples are **real instances** — none detached, none resized off their component. |
-| C-CMP-3 | graded | Per component: `variantsShown / variantsExpected` — the frame shows **all** variants/states the Contract enumerates. |
-| C-CMP-4 | **[blocker]** binary | Every component doc frame has **≥1 Do and ≥1 Don't**, each a correct instance beside an incorrect one. |
-| C-CMP-5 | binary | Every component doc frame carries an **anatomy diagram with callouts** and a **usage/props summary** sourced from the Contract. |
+| C-CMP-1 | **[blocker]** graded | Fraction of components in the inventory that have their **own documentation page** (`figmaPageId` non-null). |
+| C-CMP-2 | **[blocker]** graded | Fraction of component pages whose examples are **real instances** — none detached, none resized off their component. |
+| C-CMP-3 | graded | Per component: `variantsShown / variantsExpected` — the page shows **all** variants/states the Contract enumerates. |
+| C-CMP-4 | **[blocker]** binary | Every component page has **≥1 Do and ≥1 Don't**, each a correct instance beside an incorrect one. |
+| C-CMP-5 | binary | Every component page carries an **anatomy diagram with callouts** and a **usage/props summary** sourced from the Contract. |
+| C-CMP-6 | **[blocker]** graded | Every component page carries **≥1 use-case frame** — the component in realistic context with an explanatory caption (`useCaseCount ≥ 1`, §7.0). A page that is only a variant grid with no use-case demonstration fails. |
+| C-CMP-7 | binary | Where a component's **Markdown usage guide** exists (`usageGuideRef` set), it is **fresh** (`sourceHash` current). Optional artifact — absence never fails; staleness does (§7.0.1). |
 
 ### Dogfooding & hygiene
 | ID | Type | Check |
@@ -382,9 +405,9 @@ The canvas docs are indexed in `ds-manifest.json` so `/audit` can locate each fr
 | C-DOG-2 | binary | Every doc frame carries the footer **freshness stamp** (`generatedFrom` + short `sourceHash`). |
 
 ### Score & gate
-The canvas docs are **Canvas-conformant** when every **[blocker]** check passes; the **Canvas Documentation Score** is the fraction of all checks passed (graded checks contribute their ratio). `/setup` emits canvas docs that pass all checks; `/extend` must not lower the score (every new component ships its conformant doc frame); `/audit` reports failing check IDs with the offending Figma node id and, for stale frames, the diverging `sourceHash`.
+The canvas docs are **Canvas-conformant** when every **[blocker]** check passes; the **Canvas Documentation Score** is the fraction of all checks passed (graded checks contribute their ratio). `/setup` emits canvas docs that pass all checks; `/extend` must not lower the score (every new component ships its own conformant page); `/audit` reports failing check IDs with the offending Figma node id and, for stale frames, the diverging `sourceHash`.
 
-**Gate rule:** a canvas doc set is *non-conformant* — regardless of other scores — if any of these hold: the doc layer is **missing / was skipped** (C-STRUCT-0), a required foundation or component frame is absent (C-STRUCT-2, C-CMP-1), components are **scattered** rather than in the auto-layout grid (C-STRUCT-5), any frames **overlap or are absolute-positioned** (C-STRUCT-6, C-STRUCT-8), or any frame is **stale** (C-FRESH-1). Missing, structurally-wrong, and stale doc layers all actively mislead a designer reading the file — which is exactly what this standard exists to prevent.
+**Gate rule:** a canvas doc set is *non-conformant* — regardless of other scores — if any of these hold: the doc layer is **missing / was skipped** (C-STRUCT-0), a required foundation frame or a component's **own page** is absent (C-STRUCT-2, C-CMP-1), any component **lacks its own page** or shares one (C-STRUCT-5), a component page carries **no use-case frame** (C-CMP-6), any frames **overlap or are absolute-positioned** (C-STRUCT-6, C-STRUCT-8), or any frame is **stale** (C-FRESH-1). Missing, structurally-wrong, under-documented, and stale doc layers all actively mislead a designer reading the file — which is exactly what this standard exists to prevent.
 
 ---
 
